@@ -5,7 +5,7 @@ info:
   description: The Bokio Company API containing all resources for company tenant.
   contact:
     name: Bokio
-    url: https://api.bokio.se
+    url: https://docs.bokio.se
     email: support@bokio.se
 externalDocs:
   url: https://docs.bokio.se
@@ -124,6 +124,7 @@ paths:
           description: Page number
           schema:
             type: integer
+            format: int32
             default: 1
         - name: pageSize
           in: query
@@ -131,6 +132,7 @@ paths:
           description: Number of items per page
           schema:
             type: integer
+            format: int32
             default: 25
             maximum: 100
       responses:
@@ -416,6 +418,7 @@ paths:
           description: Page number
           schema:
             type: integer
+            format: int32
             default: 1
         - name: pageSize
           in: query
@@ -423,6 +426,7 @@ paths:
           description: Number of items per page
           schema:
             type: integer
+            format: int32
             default: 25
       responses:
         "200":
@@ -633,6 +637,7 @@ paths:
           description: Page number
           schema:
             type: integer
+            format: int32
             default: 1
         - name: pageSize
           in: query
@@ -640,6 +645,7 @@ paths:
           description: Number of items per page
           schema:
             type: integer
+            format: int32
             default: 25
             maximum: 100
       responses:
@@ -927,6 +933,7 @@ paths:
           description: Page number
           schema:
             type: integer
+            format: int32
             default: 1
         - name: pageSize
           in: query
@@ -934,6 +941,7 @@ paths:
           description: Number of items per page
           schema:
             type: integer
+            format: int32
             default: 25
             maximum: 100
       responses:
@@ -1314,6 +1322,7 @@ paths:
           description: Page number
           schema:
             type: integer
+            format: int32
             default: 1
         - name: pageSize
           in: query
@@ -1321,6 +1330,7 @@ paths:
           description: Number of items per page
           schema:
             type: integer
+            format: int32
             default: 25
             maximum: 100
       responses:
@@ -1487,10 +1497,13 @@ components:
       properties:
         totalItems:
           type: integer
+          format: int32
         totalPages:
           type: integer
+          format: int32
         currentPage:
           type: integer
+          format: int32
     journalEntry:
       type: object
       title: journalEntry
@@ -1557,6 +1570,7 @@ components:
           format: double
         account:
           type: integer
+          format: int32
           example: 1930
       example:
         id: 1
@@ -1590,8 +1604,6 @@ components:
       required:
         - name
         - type
-        - language
-        - address
       properties:
         id:
           type: string
@@ -1630,6 +1642,7 @@ components:
           $ref: "#/components/schemas/address"
         language:
           type: string
+          description: Default 'sv'
           enum:
             - sv
             - en

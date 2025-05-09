@@ -3,19 +3,18 @@ info:
   version: "0.3"
   title: General API
   description: Bokio General API
-  termsOfService: http://api.bokio.se/terms/
   contact:
     name: Bokio
-    url: http://api.bokio.se
+    url: https://docs.bokio.se
     email: support@bokio.se
 externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
 tags:
   - name: authorization
-    description: Authorization endpoints
+    description: Authorization operations for OAuth 2.0 Grants
   - name: connections
-    description: Connections endpoints
+    description: Connections operations
 servers:
   - url: https://api.bokio.se
     description: Bokio API
@@ -27,12 +26,11 @@ paths:
         - authorization
       summary: Obtain access token
       description: |
-        'Exchange authorization code for access token, request token with client credentials, or refresh an existing token.
+        OAuth 2.0 token endpoint to exchange authorization code for access token, request token with client credentials, or refresh an existing token.
 
         - Use Authorization Code grant to obtain access token for a Company to use with the Company API.
         - Use Refresh Token grant to obtain a new access token using a refresh token.
         - Use Client Credentials grant to obtain access token for the General API.
-        '
       operationId: request-token
       requestBody:
         content:
@@ -117,7 +115,10 @@ paths:
       tags:
         - authorization
       summary: Authorize the client
-      description: Initiate the OAuth 2.0 Authorization Code flow to obtain an authorization code to exchange for an access token. Use Authorization Code flow to obtain access token for a Company
+      description: |
+        OAuth 2.0 authorization endpoint to initiate the OAuth 2.0 Authorization Code grant to obtain an authorization code to exchange for an access token.
+
+        Use Authorization Code grant to obtain access token for a Company.
       operationId: authorize
       parameters:
         - name: response_type
@@ -226,10 +227,13 @@ components:
       properties:
         totalItems:
           type: integer
+          format: int32
         totalPages:
           type: integer
+          format: int32
         currentPage:
           type: integer
+          format: int32
     token:
       type: object
       title: Token
@@ -250,6 +254,7 @@ components:
           type: string
         expires_in:
           type: integer
+          format: int32
         refresh_token:
           type: string
           description: Returned for authorization_code and refresh_token grant types. The client_credentials grant expected that refresh are done by making another `/token` request with client_credentials grant.
