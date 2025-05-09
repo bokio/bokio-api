@@ -1,0 +1,2035 @@
+openapi: 3.0.3
+info:
+  version: "0.3"
+  title: Company API
+  description: The Bokio Company API containing all resources for company tenant.
+  contact:
+    name: Bokio
+    url: https://api.bokio.se
+    email: support@bokio.se
+externalDocs:
+  url: https://docs.bokio.se
+  description: Read the API Documentation
+tags:
+  - name: customers
+    description: Operations for managing customer data
+  - name: invoices
+    description: Operations for managing invoices
+  - name: items
+    description: Operations for managing inventory items
+  - name: journal-entries
+    description: Operations for managing accounting journal entries
+  - name: uploads
+    description: Operations for managing file uploads
+servers:
+  - url: https://api.bokio.se
+    description: Bokio API
+    x-bokio-api: true
+security:
+  - tokenAuth: []
+paths:
+  "/companies/{companyId}/journal-entries":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - journal-entries
+      summary: Create a journal entry
+      description: |
+        Creates a journal entry for the company.
+
+        **Handling validation errors:**
+
+        If this operations returns a 400 status code, inspect the response body's api error object for more information. There will be additional information in the innerCode if the code=validation-error.
+      operationId: post-journalentry
+      requestBody:
+        description: Post the necessary fields for the API to create a new journal entry.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/journalEntry"
+            examples:
+              New journal:
+                value:
+                  title: invoice 1234
+                  date: 2024-10-10
+                  items:
+                    - debit: 200
+                      credit: 0
+                      account: 1930
+                    - debit: 0
+                      credit: 40
+                      account: 3011
+                    - debit: 0
+                      credit: 160
+                      account: 2611
+      responses:
+        "200":
+          description: Journal entry created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/journalEntry"
+              examples:
+                Journal entry created:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - journal-entries
+      summary: Get journal entries
+      description: Get journal entries for the company. Use the query parameters to navigate through the results.
+      operationId: get-journalentry
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+      responses:
+        "200":
+          description: Journal entries found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/journalEntry"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/journal-entries/{journalId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: journalId
+        in: path
+        required: true
+        description: Unique identifier of the journal entry
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    get:
+      tags:
+        - journal-entries
+      summary: Get a journal entry
+      description: Retrieve the information of the journal with the matching journalId.
+      operationId: get-journalentries-journalId
+      responses:
+        "200":
+          description: Journal entry found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/journalEntry"
+              examples:
+                Update journal:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+        "404":
+          description: Journal entry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: journal entry not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/journal-entries/{journalEntryId}/reverse":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: journalEntryId
+        in: path
+        required: true
+        description: Unique identifier of the journal entry
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - journal-entries
+      summary: Reverse a journal entry
+      description: |
+        Reverse a journal entry for the company.
+
+        ### Journal entries possible to reverse
+
+        - It's possible to reverse journal entries that have been created through the API. Journal entries that have been created through the Bokio UI can't be reversed through the API.
+        - Journal entries that belong to a Bokio invoice or similar cannot be reversed using this endpoint.
+        - Journal entries that have been reversed can not be reversed again.
+
+        ### Handling validation errors:
+
+        If this operation returns a 400 status code, inspect the response body's apiError object for more information. There will be additional information in the innerCode if the code=validation-error.
+      operationId: reverse-journalentry
+      responses:
+        "200":
+          description: Journal entry reversed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/journalEntry"
+              examples:
+                Reversed journal entry:
+                  value:
+                    id: 835ba700-b306-4bd9-8447-59207b6b0002
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 0
+                        credit: 200
+                        account: 1930
+                      - id: 2
+                        debit: 40
+                        credit: 0
+                        account: 3011
+                      - id: 3
+                        debit: 160
+                        credit: 0
+                        account: 2611
+                    reversingJournalEntryId: a419cf69-db6f-4de9-992c-b1a60942a443
+        "400":
+          description: Not allowed to reverse journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: No changes can be made in a closed fiscal year.
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: journal entry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: journal entry not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/uploads":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - uploads
+      summary: Add an upload
+      description: |
+        Add an upload to bokio in the form of an image or pdf. One file can be uploaded per request. The request must be **multi-part MIME**.
+
+        #### Sample request for uploading a file using multipart MIME
+        ```
+        POST http://api.bokio.se/companies/{companyId}/uploads
+        Content-Type: multipart/form-data; boundary=----FormBoundary7MA4YWxkTrZu0gW
+        Authorization: Bearer <token>
+
+        ------FormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="File"; filename="receipt.png"
+        Content-Type: image/png
+
+        < ./receipt.png
+
+        ------WebKitFormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="journalEntryId"
+
+        835ba700-b306-4bd9-8447-59207b6b0002
+
+        ------WebKitFormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="description"
+
+        Description for the upload
+
+        ------FormBoundary7MA4YWxkTrZu0gW--
+        ```
+      operationId: add-upload
+      parameters:
+        - name: Content-Type
+          in: header
+          required: true
+          description: Content type of the request
+          schema:
+            type: string
+          example: multipart/form-data;boundary=JLQPFBPUP0
+      requestBody:
+        description: File and information for upload
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload
+                description:
+                  type: string
+                  description: Description of the upload. If left empty, the file name will be used.
+                  example: Receipt for invoice 1234
+                journalEntryId:
+                  type: string
+                  format: uuid
+                  description: The journal entry id to attach the upload to
+                  example: 835ba700-b306-4bd9-8447-59207b6b0002
+              required:
+                - file
+      responses:
+        "200":
+          description: Successfully added
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/upload"
+              examples:
+                upload added:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    description: example.png
+                    contentType: img/png
+                    journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
+        "400":
+          description: Invalid file data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Invalid file data
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - uploads
+      summary: Get uploads
+      description: Get all uploads for the company. Use the query parameters to navigate through the results.
+      operationId: get-uploads
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 25
+      responses:
+        "200":
+          description: uploads found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/upload"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/uploads/{uploadId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: uploadId
+        in: path
+        required: true
+        description: Unique identifier of the upload
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    get:
+      tags:
+        - uploads
+      summary: Get an upload
+      description: Retrieve the information of the upload with the matching uploadId.
+      operationId: get-upload
+      responses:
+        "200":
+          description: upload found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/upload"
+              examples:
+                upload found:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    description: example.png
+                    contentType: img/png
+                    journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
+        "404":
+          description: upload not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: upload not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/uploads/{uploadId}/download":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: uploadId
+        in: path
+        required: true
+        description: Unique identifier of the upload
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    get:
+      tags:
+        - uploads
+      summary: Download file data for an upload
+      description: Retrieve the file data of the upload with the matching uploadId.
+      operationId: download-upload
+      responses:
+        "200":
+          description: Upload file found
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Upload not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: upload not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/customers":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - customers
+      summary: Create a customer
+      description: Creates a customer for the company.
+      operationId: post-customer
+      requestBody:
+        description: Post the necessary fields for the API to create a customer.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer"
+            examples:
+              New customer:
+                value:
+                  name: customer 1
+                  type: company
+                  vatNumber: SE1234567890
+                  orgNumber: 123456-7890
+                  contactsDetails:
+                    - name: John Doe
+                      email: john@email.com
+                      phone: 0927-5631505
+                      isDefault: true
+                  address:
+                    line1: Älvsborgsvägen 10
+                    line2: null
+                    city: Göteborg
+                    postalCode: 123 45
+                    country: SE
+                  language: sv
+      responses:
+        "200":
+          description: Customer created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer"
+              examples:
+                customer created:
+                  value:
+                    name: customer 1
+                    type: company
+                    vatNumber: SE1234567890
+                    orgNumber: 123456-7890
+                    contactsDetails:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        name: John Doe
+                        email: john@email.com
+                        phone: 0927-5631505
+                        isDefault: true
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    language: sv
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - customers
+      summary: Get customers
+      description: Get all customers for the company. Use the query parameters to navigate through the results.
+      operationId: get-customer
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+      responses:
+        "200":
+          description: Customers found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/customer"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/customers/{customerId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        example: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+        description: Unique identifier of the customer
+    get:
+      tags:
+        - customers
+      summary: Get a customer
+      description: Retrieve the information of the customer with the matching customerId.
+      operationId: get-customers-customerId
+      responses:
+        "200":
+          description: Customer found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer"
+              examples:
+                customer found:
+                  value:
+                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                    name: customer 1
+                    type: company
+                    vatNumber: SE1234567890
+                    orgNumber: 123456-7890
+                    contactsDetails:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        name: John Doe
+                        email: john@email.com
+                        phone: 0927-5631505
+                        isDefault: true
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    language: sv
+        "404":
+          description: Customer not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: Customer not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    put:
+      tags:
+        - customers
+      summary: Update a customer
+      description: Update an existing customer for the company.
+      operationId: put-customer
+      requestBody:
+        description: Post the necessary fields for the API to update a customer.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/customer"
+            examples:
+              Update customer:
+                value:
+                  id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                  name: customer 1
+                  type: company
+                  vatNumber: SE1234567890
+                  orgNumber: 123456-7890
+                  contactsDetails:
+                    - Id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                      name: John Doe
+                      email: john@email.com
+                      phone: 0927-5631505
+                      isDefault: true
+                  address:
+                    line1: Älvsborgsvägen 10
+                    line2: null
+                    city: Göteborg
+                    postalCode: 123 45
+                    country: SE
+                  language: sv
+      responses:
+        "200":
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/customer"
+              examples:
+                Update customer:
+                  value:
+                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                    name: customer 1
+                    type: company
+                    vatNumber: SE1234567890
+                    orgNumber: 123456-7890
+                    contactsDetails:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        name: John Doe
+                        email: john@email.com
+                        phone: 0927-5631505
+                        isDefault: true
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    language: sv
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - customers
+      summary: Delete a customer
+      description: |
+        Delete an existing customer for the company.
+
+        NOTE: Currently only supports deleting customers that have been added through the API.
+      operationId: delete-customer
+      responses:
+        "204":
+          description: Customer deleted
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/invoices":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - invoices
+      summary: Create an invoice
+      description: |
+        Creates an new draft invoice for the company.
+      operationId: post-invoice
+      requestBody:
+        description: Post the necessary fields for the API to create a new invoice.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/invoice"
+            examples:
+              New invoice:
+                value:
+                  customerRef:
+                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                    name: customer 1
+                  invoiceNumber: "1234"
+                  currency: SEK
+                  currencyRate: 1
+                  totalAmount: 200
+                  totalTax: 50
+                  paidAmount: 0
+                  invoiceDate: 2024-10-10
+                  dueDate: 2024-10-10
+                  lineItems:
+                    - description: Product 1
+                      itemRef:
+                        id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      itemType: salesItem
+                      productType: goods
+                      unitType: piece
+                      quantity: 1
+                      unitPrice: 100
+                      taxRate: 25
+                    - description: A description line
+                      itemType: descriptionOnlyItem
+      responses:
+        "200":
+          description: Invoice created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoice"
+              examples:
+                invoice created:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    customerRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      name: customer 1
+                    invoiceNumber: "1234"
+                    currency: SEK
+                    currencyRate: 1
+                    totalAmount: 200
+                    totalTax: 50
+                    paidAmount: 0
+                    status: draft
+                    invoiceDate: 2024-10-10
+                    dueDate: 2024-10-10
+                    lineItems:
+                      - id: 1
+                        itemRef:
+                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                          description: Product 1
+                        description: Product 1
+                        itemType: salesItem
+                        productType: goods
+                        unitType: piece
+                        quantity: 1
+                        unitPrice: 100
+                        taxRate: 25
+                      - id: 2
+                        description: A description line
+                        itemType: descriptionOnlyItem
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - invoices
+      summary: Get invoices
+      description: Get all invoices for the company. Use the query parameters to navigate through the results.
+      operationId: get-invoice
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+      responses:
+        "200":
+          description: Invoices found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/invoice"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    get:
+      tags:
+        - invoices
+      summary: Get an invoice
+      description: Retrieve the information of the invoice with the matching invoiceId.
+      operationId: get-invoices-invoiceId
+      responses:
+        "200":
+          description: Invoice found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoice"
+              examples:
+                Update invoice:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    customerRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      name: customer 1
+                    invoiceNumber: "1234"
+                    currency: SEK
+                    currencyRate: 1
+                    totalAmount: 200
+                    totalTax: 50
+                    paidAmount: 0
+                    status: draft
+                    invoiceDate: 2024-10-10
+                    dueDate: 2024-10-10
+                    lineItems:
+                      - id: 1
+                        itemRef:
+                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                        description: Product 1
+                        itemType: salesItem
+                        productType: goods
+                        unitType: piece
+                        quantity: 1
+                        unitPrice: 100
+                        taxRate: 25
+                      - id: 2
+                        description: A description line
+                        itemType: descriptionOnlyItem
+                    billingAddress:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+        "404":
+          description: invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: invoice not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    put:
+      tags:
+        - invoices
+      summary: Update an invoice
+      description: |
+        Update an existing invoice draft for the company.
+
+        This operation will update all fields of the invoice. It's recommended that you perform a GET request
+        to the invoice first to get the current state of the invoice and then update the fields you want to change.
+
+        **NOTE:** It's only possible to update invoices that are in draft status.
+      operationId: put-invoice
+      requestBody:
+        description: Post the necessary fields for the API to update an invoice.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/invoice"
+            examples:
+              Update invoice:
+                value:
+                  id: a419cf69-db6f-4de9-992c-b1a60942a443
+                  customerRef:
+                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                    name: customer 1
+                  invoiceNumber: "1234"
+                  currency: SEK
+                  currencyRate: 1
+                  totalAmount: 200
+                  totalTax: 50
+                  paidAmount: 0
+                  invoiceDate: 2024-10-10
+                  dueDate: 2024-10-10
+                  lineItems:
+                    - id: 1
+                      description: Product 1
+                      itemType: salesItem
+                      productType: goods
+                      unitType: piece
+                      quantity: 1
+                      unitPrice: 100
+                      taxRate: 25
+                    - id: 2
+                      itemRef:
+                        id: e964435e-50ef-4524-a439-05ff87794952
+                      description: A description line
+                      itemType: descriptionOnlyItem
+      responses:
+        "200":
+          description: Invoice updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoice"
+              examples:
+                Update invoice:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    customerRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      name: customer 1
+                    status: draft
+                    invoiceNumber: "1234"
+                    currency: SEK
+                    currencyRate: 1
+                    totalAmount: 200
+                    totalTax: 50
+                    paidAmount: 0
+                    invoiceDate: 2024-10-10
+                    dueDate: 2024-10-10
+                    lineItems:
+                      - id: 1
+                        description: Product 1
+                        itemType: salesItem
+                        productType: goods
+                        unitType: piece
+                        quantity: 1
+                        unitPrice: 100
+                        taxRate: 25
+                      - id: 2
+                        itemRef:
+                          id: e964435e-50ef-4524-a439-05ff87794952
+                          description: A description line
+                        description: A description line
+                        itemType: descriptionOnlyItem
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}/line-items":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - invoices
+      summary: Add a line item to an invoice
+      description: |
+        Adds a line item to an existing draft invoice. The item will be added last in the list of line items on the invoice.
+
+        **NOTE:** The invoice must be in draft status.
+      operationId: post-invoice-lineItem
+      requestBody:
+        description: Post the necessary fields for the API to add a line item to an invoice.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/invoiceItem"
+            examples:
+              New line item:
+                value:
+                  id: 1
+                  description: Product 2
+                  itemType: salesItem
+                  productType: goods
+                  unitType: piece
+                  quantity: 1
+                  unitPrice: 100
+                  taxRate: 25
+              Full line item:
+                value:
+                  id: 1
+                  itemRef:
+                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                  description: Product 1
+                  itemType: salesItem
+                  productType: goods
+                  unitType: piece
+                  quantity: 1
+                  unitPrice: 100
+                  taxRate: 25
+      responses:
+        "200":
+          description: Line item added
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/invoiceItem"
+              examples:
+                Line item:
+                  value:
+                    id: 1
+                    itemRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      description: Product 1
+                    description: Product 1
+                    itemType: salesItem
+                    productType: goods
+                    unitType: piece
+                    quantity: 1
+                    unitPrice: 100
+                    taxRate: 25
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: invoice not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/items":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - items
+      summary: Create an item
+      description: Creates a new item for the company.
+      operationId: post-item
+      requestBody:
+        description: Post the necessary fields for the API to create a new item.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/item"
+            examples:
+              New item:
+                value:
+                  description: Description of product 1
+                  itemType: salesItem
+                  productType: goods
+                  unitType: piece
+                  unitPrice: 100
+                  taxRate: 25
+      responses:
+        "200":
+          description: Item created
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/item"
+              examples:
+                Item created:
+                  value:
+                    id: 835ba700-b306-4bd9-8447-59207b6b0002
+                    description: Description of product 1
+                    itemType: salesItem
+                    productType: goods
+                    unitType: piece
+                    unitPrice: 100
+                    taxRate: 25
+        "400":
+          description: Missing Required Information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - items
+      summary: Get items
+      description: Get all items for the company. Use the query parameters to navigate through the results.
+      operationId: get-item
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            default: 25
+            maximum: 100
+      responses:
+        "200":
+          description: Items found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          oneOf:
+                            - $ref: "#/components/schemas/item"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/items/{itemId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: itemId
+        in: path
+        required: true
+        description: Unique identifier of the item
+        schema:
+          type: string
+          format: uuid
+        example: 83e3d68a-cfbc-46e4-9fe6-f0fc6d739672
+    get:
+      tags:
+        - items
+      summary: Get an item
+      description: Retrieve the information of the item with the matching itemId.
+      operationId: get-items-itemId
+      responses:
+        "200":
+          description: Item found
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/item"
+              examples:
+                Item found:
+                  value:
+                    id: 835ba700-b306-4bd9-8447-59207b6b0002
+                    description: Description of product 1
+                    itemType: salesItem
+                    productType: goods
+                    unitType: piece
+                    unitPrice: 100
+                    taxRate: 25
+        "404":
+          description: Item Not Found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: Item not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    put:
+      tags:
+        - items
+      summary: Update an item
+      description: Update an existing item for the company.
+      operationId: put-item
+      requestBody:
+        description: Post the necessary fields for the API to update an Item.
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/item"
+            examples:
+              Update item:
+                value:
+                  id: 835ba700-b306-4bd9-8447-59207b6b0002
+                  description: Description of product 1
+                  itemType: salesItem
+                  productType: goods
+                  unitType: piece
+                  unitPrice: 100
+                  taxRate: 25
+      responses:
+        "200":
+          description: Item updated
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/item"
+              examples:
+                Update item:
+                  value:
+                    id: 835ba700-b306-4bd9-8447-59207b6b0002
+                    description: Description of product 1
+                    itemType: salesItem
+                    productType: goods
+                    unitType: piece
+                    unitPrice: 100
+                    taxRate: 25
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - items
+      summary: Delete an item
+      description: Delete an existing item for the company.
+      operationId: delete-item
+      responses:
+        "204":
+          description: Item deleted
+      security:
+        - tokenAuth: []
+components:
+  securitySchemes:
+    tokenAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    apiError:
+      type: object
+      title: apiError
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        innerCode:
+          type: string
+        bokioErrorId:
+          type: string
+          format: uuid
+    pagedResponse:
+      type: object
+      title: pagedResponse
+      properties:
+        totalItems:
+          type: integer
+        totalPages:
+          type: integer
+        currentPage:
+          type: integer
+    journalEntry:
+      type: object
+      title: journalEntry
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        title:
+          type: string
+        journalEntryNumber:
+          type: string
+          readOnly: true
+        date:
+          type: string
+          format: date
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/journalEntryItem"
+        reversingJournalEntryId:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        reversedByJournalEntryId:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+      required:
+        - id
+      example:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        title: invoice 1234
+        journalEntryNumber: V342
+        date: 2024-10-10
+        items:
+          - id: 1
+            debit: 200
+            credit: 0
+            account: 1930
+          - id: 2
+            debit: 0
+            credit: 40
+            account: 3011
+          - id: 3
+            debit: 0
+            credit: 160
+            account: 2611
+    journalEntryItem:
+      type: object
+      title: journalEntryItem
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        debit:
+          type: number
+          format: double
+        credit:
+          type: number
+          format: double
+        account:
+          type: integer
+          example: 1930
+      example:
+        id: 1
+        Credit: 0
+        Debit: 200
+        Account: 1930
+    upload:
+      type: object
+      title: upload
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        description:
+          type: string
+        contentType:
+          type: string
+        journalEntryId:
+          type: string
+          format: uuid
+          nullable: true
+      example:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        description: example.png
+        contentType: img/png
+        journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
+    customer:
+      type: object
+      title: customer
+      required:
+        - name
+        - type
+        - language
+        - address
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        type:
+          type: string
+          enum:
+            - company
+            - private
+        vatNumber:
+          type: string
+        orgNumber:
+          type: string
+        contactsDetails:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                nullable: true
+                description: Should not be set for new items
+              name:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+              isDefault:
+                type: boolean
+        address:
+          $ref: "#/components/schemas/address"
+        language:
+          type: string
+          enum:
+            - sv
+            - en
+      example:
+        id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+        name: customer 1
+        type: company
+        vatNumber: SE1234567890
+        orgNumber: 123456-7890
+        contactsDetails:
+          - name: John Doe
+            email: john@email.com
+            phone: 0927-5631505
+            isDefault: true
+        address:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        language: sv
+    address:
+      type: object
+      title: address
+      required:
+        - line1
+        - city
+        - postalCode
+        - country
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          description: ISO 3166-1 alpha-2 country code
+          type: string
+          format: country
+      example:
+        line1: Älvsborgsvägen 10
+        line2: null
+        city: Göteborg
+        postalCode: 123 45
+        country: SE
+    invoice:
+      type: object
+      title: invoice
+      required:
+        - invoiceDate
+        - dueDate
+        - lineItems
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customerRef:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              readOnly: true
+        invoiceNumber:
+          type: string
+          readOnly: true
+          nullable: true
+          description: The invoice number will be generated at the time of publishing the invoice.
+        currency:
+          description: ISO 4217 currency code
+          type: string
+          default: SEK
+        currencyRate:
+          type: number
+          format: double
+          default: 1
+        totalAmount:
+          type: number
+          format: double
+          readOnly: true
+        totalTax:
+          type: number
+          format: double
+          readOnly: true
+        paidAmount:
+          type: number
+          format: double
+          readOnly: true
+        status:
+          type: string
+          enum:
+            - draft
+            - published
+            - paid
+            - overpaid
+            - underpaid
+            - overdue
+            - credited
+            - credit
+          default: draft
+          readOnly: true
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        lineItems:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/invoiceItem"
+        billingAddress:
+          readOnly: true
+          oneOf:
+            - $ref: "#/components/schemas/address"
+      example:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+        invoiceNumber: "1234"
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 200
+        totalTax: 50
+        paidAmount: 0
+        status: draft
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+              description: Product 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 100
+            taxRate: 25
+          - id: 2
+            itemRef:
+              id: e964435e-50ef-4524-a439-05ff87794952
+              description: A description line
+            description: A description line
+            itemType: descriptionOnlyItem
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+    invoiceItem:
+      type: object
+      title: lineItem
+      oneOf:
+        - $ref: "#/components/schemas/salesInvoiceItem"
+        - $ref: "#/components/schemas/descriptionOnlyInvoiceItem"
+    item:
+      type: object
+      title: item
+      oneOf:
+        - $ref: "#/components/schemas/salesItem"
+        - $ref: "#/components/schemas/descriptionOnlyItem"
+    salesItem:
+      type: object
+      title: salesItem
+      required:
+        - description
+        - itemType
+        - productType
+        - unitType
+        - unitPrice
+        - taxRate
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Should not be set for new items
+        description:
+          type: string
+        itemType:
+          type: string
+          enum:
+            - salesItem
+        productType:
+          type: string
+          enum:
+            - goods
+            - services
+        unitType:
+          type: string
+          enum:
+            - unspecified
+            - piece
+            - hour
+            - day
+            - month
+            - kilogram
+            - gram
+            - liter
+            - meter
+            - centimeter
+            - millimeter
+            - meterSquared
+            - meterCubic
+            - mile
+            - kilometer
+            - gigabyte
+            - hectar
+            - words
+            - year
+            - week
+            - minute
+            - megabyte
+            - ton
+        unitPrice:
+          type: number
+          format: double
+        taxRate:
+          type: number
+          format: double
+      example:
+        id: fc967153-1f8a-48d0-b773-fe3e61978263
+        description: Product 1
+        itemType: salesItem
+        productType: goods
+        unitType: piece
+        unitPrice: 100
+        taxRate: 25
+    descriptionOnlyItem:
+      type: object
+      title: descriptionOnlyItem
+      required:
+        - description
+        - itemType
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Should not be set for new items
+        description:
+          type: string
+        itemType:
+          type: string
+          enum:
+            - descriptionOnlyItem
+      example:
+        id: bd34bd41-d13b-434d-858e-092231d6228a
+        description: Custom description line
+        itemType: descriptionOnlyItem
+    salesInvoiceItem:
+      type: object
+      title: salesItem
+      required:
+        - description
+        - itemType
+        - productType
+        - quantity
+        - unitPrice
+        - taxRate
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Should not be set for new items
+        itemRef:
+          type: object
+          title: itemRef
+          nullable: true
+          description: |
+            Identifier of an existing salesItem to use as a template. ItemType, Quantity are required. Values in other fields will be overridden by values from this referenced item
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Reference to existing salesItem id
+              example: 869a69a3-632b-4a09-899e-9dc03342b5dc
+            description:
+              type: string
+              nullable: true
+              readOnly: true
+        description:
+          type: string
+        itemType:
+          type: string
+          enum:
+            - salesItem
+        productType:
+          type: string
+          enum:
+            - goods
+            - services
+        unitType:
+          type: string
+          default: unspecified
+          enum:
+            - unspecified
+            - piece
+            - hour
+            - day
+            - month
+            - kilogram
+            - gram
+            - liter
+            - meter
+            - centimeter
+            - millimeter
+            - meterSquared
+            - meterCubic
+            - mile
+            - kilometer
+            - gigabyte
+            - hectar
+            - words
+            - year
+            - week
+            - minute
+            - megabyte
+            - ton
+        quantity:
+          type: number
+          format: double
+          default: 1
+        unitPrice:
+          type: number
+          format: double
+        taxRate:
+          type: number
+          format: double
+      example:
+        id: 1
+        itemRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          description: Product 1
+        description: Product 1
+        itemType: salesItem
+        productType: goods
+        unitType: piece
+        quantity: 1
+        unitPrice: 100
+        taxRate: 25
+    descriptionOnlyInvoiceItem:
+      type: object
+      title: descriptionOnlyItem
+      required:
+        - description
+        - itemType
+      properties:
+        id:
+          type: integer
+          format: int64
+          nullable: true
+          description: Should not be set for new items
+        itemRef:
+          type: object
+          nullable: true
+          description: |
+            Identifier of an existing descriptionOnlyItem to use as a template.
+          properties:
+            id:
+              type: string
+              format: uuid
+              description: Reference to existing descriptionOnlyItem id
+              example: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+            description:
+              type: string
+              nullable: true
+              readOnly: true
+        description:
+          type: string
+        itemType:
+          type: string
+          enum:
+            - descriptionOnlyItem
+      example:
+        id: 2
+        itemRef:
+          id: e964435e-50ef-4524-a439-05ff87794952
+          description: Custom description line
+        description: Custom description line
+        itemType: descriptionOnlyItem
+x-readme:
+  explorer-enabled: true
+  proxy-enabled: false
+  samples-languages:
+    - shell
+    - http
+    - node
+    - csharp
+    - java
