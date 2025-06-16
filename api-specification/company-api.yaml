@@ -7,9 +7,12 @@ info:
     name: Bokio
     url: https://docs.bokio.se
     email: support@bokio.se
-externalDocs:
-  url: https://docs.bokio.se
-  description: Read the API Documentation
+servers:
+  - url: https://api.bokio.se
+    description: Bokio API
+    x-bokio-api: true
+security:
+  - tokenAuth: []
 tags:
   - name: customers
     description: Operations for managing customer data
@@ -21,12 +24,9 @@ tags:
     description: Operations for managing accounting journal entries
   - name: uploads
     description: Operations for managing file uploads
-servers:
-  - url: https://api.bokio.se
-    description: Bokio API
-    x-bokio-api: true
-security:
-  - tokenAuth: []
+externalDocs:
+  url: https://docs.bokio.se
+  description: Read the API Documentation
 paths:
   "/companies/{companyId}/journal-entries":
     parameters:
@@ -151,7 +151,7 @@ paths:
                           $ref: "#/components/schemas/journalEntry"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/journal-entries/{journalId}":
+  "/companies/{companyId}/journal-entries/{journalEntryId}":
     parameters:
       - name: companyId
         in: path
@@ -161,7 +161,7 @@ paths:
           type: string
           format: uuid
         example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
-      - name: journalId
+      - name: journalEntryId
         in: path
         required: true
         description: Unique identifier of the journal entry
@@ -173,7 +173,7 @@ paths:
       tags:
         - journal-entries
       summary: Get a journal entry
-      description: Retrieve the information of the journal with the matching journalId.
+      description: Retrieve the information of the journal with the matching journalEntryId.
       operationId: get-journalentries-journalId
       responses:
         "200":
@@ -571,6 +571,7 @@ paths:
                   type: company
                   vatNumber: SE1234567890
                   orgNumber: 123456-7890
+                  paymentTerms: "30"
                   contactsDetails:
                     - name: John Doe
                       email: john@email.com
@@ -597,6 +598,7 @@ paths:
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
+                    paymentTerms: "30"
                     contactsDetails:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         name: John Doe
@@ -620,8 +622,15 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 3 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/name"
+                        message: The name field is required
+                      - field: "#/type"
+                        message: The type field is required
+                      - field: "#/address/country"
+                        message: "Invalid country code: XX"
       security:
         - tokenAuth: []
     get:
@@ -703,6 +712,7 @@ paths:
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
+                    paymentTerms: "30"
                     contactsDetails:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         name: John Doe
@@ -750,6 +760,7 @@ paths:
                   type: company
                   vatNumber: SE1234567890
                   orgNumber: 123456-7890
+                  paymentTerms: "30"
                   contactsDetails:
                     - Id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                       name: John Doe
@@ -778,6 +789,7 @@ paths:
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
+                    paymentTerms: "30"
                     contactsDetails:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         name: John Doe
@@ -801,8 +813,15 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 3 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/name"
+                        message: The name field is required
+                      - field: "#/type"
+                        message: The type field is required
+                      - field: "#/address/country"
+                        message: "Invalid country code: XX"
       security:
         - tokenAuth: []
     delete:
@@ -906,6 +925,17 @@ paths:
                       - id: 2
                         description: A description line
                         itemType: descriptionOnlyItem
+                    billingAddress:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    attachmentRefs:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        fileName: myfile.pdf
+                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+                        fileName: myfile2.pdf
         "400":
           description: Missing required information
           content:
@@ -1027,8 +1057,13 @@ paths:
                       city: Göteborg
                       postalCode: 123 45
                       country: SE
+                    attachmentRefs:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        fileName: myfile.pdf
+                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+                        fileName: myfile2.pdf
         "404":
-          description: invoice not found
+          description: Invoice not found
           content:
             application/json:
               schema:
@@ -1126,6 +1161,17 @@ paths:
                           description: A description line
                         description: A description line
                         itemType: descriptionOnlyItem
+                    billingAddress:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    attachmentRefs:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        fileName: myfile.pdf
+                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+                        fileName: myfile2.pdf
         "400":
           description: Missing required information
           content:
@@ -1245,6 +1291,328 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}/attachments":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - invoices
+      summary: Add an attachment to an invoice
+      description: |
+        Adds an attachment to an existing draft invoice. The attachment will be added last in the list of attachments on the invoice.
+        Attached files will appear as additional pages in the final invoice
+
+        Supported file types: jpeg, png and pdf
+
+        Show example of multipart MIME as we do for uploads
+
+        **NOTE:** The invoice must be in draft status.
+        Maximum file size is 4 MB and all files can't exceed 10 MB.
+        Dimensions must be less than height of 7016 and width of 4960 in pixels
+      operationId: post-invoice-attachment
+      parameters:
+        - name: Content-Type
+          in: header
+          required: true
+          description: Content type of the request
+          schema:
+            type: string
+          example: multipart/form-data;boundary=JLQPFBPUP0
+      requestBody:
+        description: Post the necessary fields for the API to add an attachment to an invoice.
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to attach to invoice
+              required:
+                - file
+      responses:
+        "200":
+          description: Attachment added to invoice
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/invoiceAttachment"
+              examples:
+                Attachment:
+                  value:
+                    id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                    invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+                    fileName: myfile.pdf
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                AttachmentNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource attachment with value 240a4af0-edfd-47b1-b4ab-f30450eaac19 was not found
+                    bokioErrorId: 8d408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - invoices
+      summary: Get attachments
+      description: Retrieve the information of the attachments for the invoice. Use the query parameters to navigate through the results.
+      operationId: get-invoice-attachments
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+      responses:
+        "200":
+          description: Attachments found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/invoiceAttachment"
+              examples:
+                Attachments:
+                  value:
+                    totalItems: 2
+                    totalPages: 1
+                    currentPage: 1
+                    items:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+                        fileName: myfile.pdf
+                      - id: 390a4af0-edfd-47b1-b4ab-f30450eaac19
+                        invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+                        fileName: myfile2.pdf
+        "404":
+          description: The requested resource was not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+      - name: attachmentId
+        in: path
+        required: true
+        description: Unique identifier of the attachment
+        schema:
+          type: string
+          format: uuid
+        example: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+    get:
+      tags:
+        - invoices
+      summary: Get an attachment
+      description: Retrieve the information of the attachment with the matching attachmentId.
+      operationId: get-invoice-attachment
+      responses:
+        "200":
+          description: Attachment found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoiceAttachment"
+              examples:
+                Attachment:
+                  value:
+                    id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                    invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+                    fileName: myfile.pdf
+        "404":
+          description: Attachment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                AttachmentNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource attachment with value 240a4af0-edfd-47b1-b4ab-f30450eaac19 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 869a69a3-632b-4a09-899e-9dc03342b5dc
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - invoices
+      summary: Delete an attachment from an invoice
+      description: |
+        Deletes an attachment from an existing draft invoice.
+
+        **NOTE:** The invoice must be in draft status.
+      operationId: delete-invoice-attachment
+      responses:
+        "204":
+          description: Attachment deleted from invoice
+        "404":
+          description: Attachment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                AttachmentNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource attachment with value 240a4af0-edfd-47b1-b4ab-f30450eaac19 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 3b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}/download":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+      - name: attachmentId
+        in: path
+        required: true
+        description: Unique identifier of the attachment
+        schema:
+          type: string
+          format: uuid
+        example: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+    get:
+      tags:
+        - invoices
+      summary: Download an attachment from an invoice
+      description: Download the attachment with the matching attachmentId.
+      operationId: download-invoice-attachment
+      responses:
+        "200":
+          description: Attachment found and downloaded successfully.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+              examples:
+                Attachment found and downloaded successfully.:
+                  value: fileName.pdf
+        "404":
+          description: Attachment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                AttachmentNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource attachment with value 240a4af0-edfd-47b1-b4ab-f30450eaac19 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 869a69a3-632b-4a09-899e-9dc03342b5dc
+      security:
+        - tokenAuth: []
   "/companies/{companyId}/items":
     parameters:
       - name: companyId
@@ -1305,8 +1673,15 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 3 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/description"
+                        message: The description field is required
+                      - field: "#/itemType"
+                        message: The item type field is required
+                      - field: "#/unitPrice"
+                        message: The unit price field is required
       security:
         - tokenAuth: []
     get:
@@ -1457,8 +1832,15 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 3 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/description"
+                        message: The description field is required
+                      - field: "#/unitPrice"
+                        message: The unit price field is required
+                      - field: "#/taxRate"
+                        message: "Invalid tax rate. The tax rate must be one of the following values: 0%, 6%, 12%, or 25%"
       security:
         - tokenAuth: []
     delete:
@@ -1477,20 +1859,23 @@ components:
     tokenAuth:
       type: http
       scheme: bearer
+    access_token:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /token
+          scopes: {}
+        authorizationCode:
+          authorizationUrl: /authorize
+          tokenUrl: /token
+          scopes:
+            invoices: Read and write access to invoices, customers and items
+            accounting: Read and write access to journal entries
+            uploads: Read and write access to uploads
+    client_auth:
+      type: http
+      scheme: basic
   schemas:
-    apiError:
-      type: object
-      title: apiError
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        innerCode:
-          type: string
-        bokioErrorId:
-          type: string
-          format: uuid
     pagedResponse:
       type: object
       title: pagedResponse
@@ -1504,6 +1889,29 @@ components:
         currentPage:
           type: integer
           format: int32
+    journalEntryItem:
+      type: object
+      title: journalEntryItem
+      properties:
+        id:
+          type: integer
+          format: int64
+          readOnly: true
+        debit:
+          type: number
+          format: double
+        credit:
+          type: number
+          format: double
+        account:
+          type: integer
+          format: int32
+          example: 1930
+      example:
+        id: 1
+        Credit: 0
+        Debit: 200
+        Account: 1930
     journalEntry:
       type: object
       title: journalEntry
@@ -1554,29 +1962,28 @@ components:
             debit: 0
             credit: 160
             account: 2611
-    journalEntryItem:
+    apiError:
       type: object
-      title: journalEntryItem
+      title: apiError
       properties:
-        id:
-          type: integer
-          format: int64
-          readOnly: true
-        debit:
-          type: number
-          format: double
-        credit:
-          type: number
-          format: double
-        account:
-          type: integer
-          format: int32
-          example: 1930
-      example:
-        id: 1
-        Credit: 0
-        Debit: 200
-        Account: 1930
+        code:
+          type: string
+        message:
+          type: string
+        innerCode:
+          type: string
+        bokioErrorId:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
     upload:
       type: object
       title: upload
@@ -1598,6 +2005,34 @@ components:
         description: example.png
         contentType: img/png
         journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
+    address:
+      type: object
+      title: address
+      required:
+        - line1
+        - city
+        - postalCode
+        - country
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          description: ISO 3166-1 alpha-2 country code
+          type: string
+          format: country
+      example:
+        line1: Älvsborgsvägen 10
+        line2: null
+        city: Göteborg
+        postalCode: 123 45
+        country: SE
     customer:
       type: object
       title: customer
@@ -1620,6 +2055,12 @@ components:
           type: string
         orgNumber:
           type: string
+        paymentTerms:
+          type: string
+          description: |
+            Payment terms for the invoices. Payment terms can both take free text or days, in digits, until the payment is due.
+
+            On the invoice, if a digit is provided it will be suffixed with "days". For example, "30" will be displayed as "30 days" on the invoice. Note that the suffix will, similar to the rest of the invoice, use the language on the customer.
         contactsDetails:
           type: array
           items:
@@ -1652,6 +2093,7 @@ components:
         type: company
         vatNumber: SE1234567890
         orgNumber: 123456-7890
+        paymentTerms: "30"
         contactsDetails:
           - name: John Doe
             email: john@email.com
@@ -1664,247 +2106,6 @@ components:
           postalCode: 123 45
           country: SE
         language: sv
-    address:
-      type: object
-      title: address
-      required:
-        - line1
-        - city
-        - postalCode
-        - country
-      properties:
-        line1:
-          type: string
-        line2:
-          type: string
-          nullable: true
-        city:
-          type: string
-        postalCode:
-          type: string
-        country:
-          description: ISO 3166-1 alpha-2 country code
-          type: string
-          format: country
-      example:
-        line1: Älvsborgsvägen 10
-        line2: null
-        city: Göteborg
-        postalCode: 123 45
-        country: SE
-    invoice:
-      type: object
-      title: invoice
-      required:
-        - invoiceDate
-        - dueDate
-        - lineItems
-      properties:
-        id:
-          type: string
-          format: uuid
-          readOnly: true
-        customerRef:
-          type: object
-          properties:
-            id:
-              type: string
-              format: uuid
-            name:
-              type: string
-              readOnly: true
-        invoiceNumber:
-          type: string
-          readOnly: true
-          nullable: true
-          description: The invoice number will be generated at the time of publishing the invoice.
-        currency:
-          description: ISO 4217 currency code
-          type: string
-          default: SEK
-        currencyRate:
-          type: number
-          format: double
-          default: 1
-        totalAmount:
-          type: number
-          format: double
-          readOnly: true
-        totalTax:
-          type: number
-          format: double
-          readOnly: true
-        paidAmount:
-          type: number
-          format: double
-          readOnly: true
-        status:
-          type: string
-          enum:
-            - draft
-            - published
-            - paid
-            - overpaid
-            - underpaid
-            - overdue
-            - credited
-            - credit
-          default: draft
-          readOnly: true
-        invoiceDate:
-          type: string
-          format: date
-        dueDate:
-          type: string
-          format: date
-        lineItems:
-          type: array
-          items:
-            oneOf:
-              - $ref: "#/components/schemas/invoiceItem"
-        billingAddress:
-          readOnly: true
-          oneOf:
-            - $ref: "#/components/schemas/address"
-      example:
-        id: a419cf69-db6f-4de9-992c-b1a60942a443
-        customerRef:
-          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-          name: customer 1
-        invoiceNumber: "1234"
-        currency: SEK
-        currencyRate: 1
-        totalAmount: 200
-        totalTax: 50
-        paidAmount: 0
-        status: draft
-        invoiceDate: 2024-10-10
-        dueDate: 2024-10-10
-        lineItems:
-          - id: 1
-            itemRef:
-              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-              description: Product 1
-            description: Product 1
-            itemType: salesItem
-            productType: goods
-            unitType: piece
-            quantity: 1
-            unitPrice: 100
-            taxRate: 25
-          - id: 2
-            itemRef:
-              id: e964435e-50ef-4524-a439-05ff87794952
-              description: A description line
-            description: A description line
-            itemType: descriptionOnlyItem
-        billingAddress:
-          line1: Älvsborgsvägen 10
-          line2: null
-          city: Göteborg
-          postalCode: 123 45
-          country: SE
-    invoiceItem:
-      type: object
-      title: lineItem
-      oneOf:
-        - $ref: "#/components/schemas/salesInvoiceItem"
-        - $ref: "#/components/schemas/descriptionOnlyInvoiceItem"
-    item:
-      type: object
-      title: item
-      oneOf:
-        - $ref: "#/components/schemas/salesItem"
-        - $ref: "#/components/schemas/descriptionOnlyItem"
-    salesItem:
-      type: object
-      title: salesItem
-      required:
-        - description
-        - itemType
-        - productType
-        - unitType
-        - unitPrice
-        - taxRate
-      properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
-          description: Should not be set for new items
-        description:
-          type: string
-        itemType:
-          type: string
-          enum:
-            - salesItem
-        productType:
-          type: string
-          enum:
-            - goods
-            - services
-        unitType:
-          type: string
-          enum:
-            - unspecified
-            - piece
-            - hour
-            - day
-            - month
-            - kilogram
-            - gram
-            - liter
-            - meter
-            - centimeter
-            - millimeter
-            - meterSquared
-            - meterCubic
-            - mile
-            - kilometer
-            - gigabyte
-            - hectar
-            - words
-            - year
-            - week
-            - minute
-            - megabyte
-            - ton
-        unitPrice:
-          type: number
-          format: double
-        taxRate:
-          type: number
-          format: double
-      example:
-        id: fc967153-1f8a-48d0-b773-fe3e61978263
-        description: Product 1
-        itemType: salesItem
-        productType: goods
-        unitType: piece
-        unitPrice: 100
-        taxRate: 25
-    descriptionOnlyItem:
-      type: object
-      title: descriptionOnlyItem
-      required:
-        - description
-        - itemType
-      properties:
-        id:
-          type: string
-          format: uuid
-          nullable: true
-          description: Should not be set for new items
-        description:
-          type: string
-        itemType:
-          type: string
-          enum:
-            - descriptionOnlyItem
-      example:
-        id: bd34bd41-d13b-434d-858e-092231d6228a
-        description: Custom description line
-        itemType: descriptionOnlyItem
     salesInvoiceItem:
       type: object
       title: salesItem
@@ -2037,6 +2238,258 @@ components:
           description: Custom description line
         description: Custom description line
         itemType: descriptionOnlyItem
+    invoiceItem:
+      type: object
+      title: lineItem
+      oneOf:
+        - $ref: "#/components/schemas/salesInvoiceItem"
+        - $ref: "#/components/schemas/descriptionOnlyInvoiceItem"
+    invoice:
+      type: object
+      title: invoice
+      required:
+        - invoiceDate
+        - dueDate
+        - lineItems
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        customerRef:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            name:
+              type: string
+              readOnly: true
+        invoiceNumber:
+          type: string
+          readOnly: true
+          nullable: true
+          description: The invoice number will be generated at the time of publishing the invoice.
+        currency:
+          description: ISO 4217 currency code
+          type: string
+          default: SEK
+        currencyRate:
+          type: number
+          format: double
+          default: 1
+        totalAmount:
+          type: number
+          format: double
+          readOnly: true
+        totalTax:
+          type: number
+          format: double
+          readOnly: true
+        paidAmount:
+          type: number
+          format: double
+          readOnly: true
+        status:
+          type: string
+          enum:
+            - draft
+            - published
+            - paid
+            - overpaid
+            - underpaid
+            - overdue
+            - credited
+            - credit
+          default: draft
+          readOnly: true
+        invoiceDate:
+          type: string
+          format: date
+        dueDate:
+          type: string
+          format: date
+        lineItems:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/invoiceItem"
+        billingAddress:
+          readOnly: true
+          oneOf:
+            - $ref: "#/components/schemas/address"
+        attachmentRefs:
+          type: array
+          readOnly: true
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                readOnly: true
+              name:
+                type: string
+                readOnly: true
+      example:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+        invoiceNumber: "1234"
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 200
+        totalTax: 50
+        paidAmount: 0
+        status: draft
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+              description: Product 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 100
+            taxRate: 25
+          - id: 2
+            itemRef:
+              id: e964435e-50ef-4524-a439-05ff87794952
+              description: A description line
+            description: A description line
+            itemType: descriptionOnlyItem
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        attachmentRefs:
+          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+            fileName: myfile.pdf
+          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+            fileName: myfile2.pdf
+    invoiceAttachment:
+      type: object
+      title: invoiceAttachment
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        invoiceId:
+          type: string
+          format: uuid
+          readOnly: true
+        fileName:
+          type: string
+          readOnly: true
+      example:
+        id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+        invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+        fileName: myfile.pdf
+    salesItem:
+      type: object
+      title: salesItem
+      required:
+        - description
+        - itemType
+        - productType
+        - unitType
+        - unitPrice
+        - taxRate
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Should not be set for new items
+        description:
+          type: string
+          minLength: 1
+          maxLength: 500
+        itemType:
+          type: string
+          enum:
+            - salesItem
+        productType:
+          type: string
+          enum:
+            - goods
+            - services
+        unitType:
+          type: string
+          enum:
+            - unspecified
+            - piece
+            - hour
+            - day
+            - month
+            - kilogram
+            - gram
+            - liter
+            - meter
+            - centimeter
+            - millimeter
+            - meterSquared
+            - meterCubic
+            - mile
+            - kilometer
+            - gigabyte
+            - hectar
+            - words
+            - year
+            - week
+            - minute
+            - megabyte
+            - ton
+        unitPrice:
+          type: number
+          format: double
+        taxRate:
+          type: number
+          format: double
+      example:
+        id: fc967153-1f8a-48d0-b773-fe3e61978263
+        description: Product 1
+        itemType: salesItem
+        productType: goods
+        unitType: piece
+        unitPrice: 100
+        taxRate: 25
+    descriptionOnlyItem:
+      type: object
+      title: descriptionOnlyItem
+      required:
+        - description
+        - itemType
+      properties:
+        id:
+          type: string
+          format: uuid
+          nullable: true
+          description: Should not be set for new items
+        description:
+          type: string
+        itemType:
+          type: string
+          enum:
+            - descriptionOnlyItem
+      example:
+        id: bd34bd41-d13b-434d-858e-092231d6228a
+        description: Custom description line
+        itemType: descriptionOnlyItem
+    item:
+      type: object
+      title: item
+      oneOf:
+        - $ref: "#/components/schemas/salesItem"
+        - $ref: "#/components/schemas/descriptionOnlyItem"
 x-readme:
   explorer-enabled: true
   proxy-enabled: false
