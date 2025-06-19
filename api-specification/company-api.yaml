@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: "0.3"
+  version: "0.4"
   title: Company API
   description: The Bokio Company API containing all resources for company tenant.
   contact:
@@ -107,8 +107,13 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 2 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/title"
+                        message: The title field is required
+                      - field: "#/items/1/account"
+                        message: The account field is required
       security:
         - tokenAuth: []
     get:
@@ -400,9 +405,12 @@ paths:
               examples:
                 Error:
                   value:
+                    message: Validation failed with 1 error
                     code: validation-error
-                    message: Invalid file data
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/file"
+                        message: Invalid file type. Only application/pdf and image/png files are allowed.
       security:
         - tokenAuth: []
     get:
@@ -946,8 +954,13 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 2 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/invoiceDate"
+                        message: The invoice date field is required
+                      - field: "#/lineItems/0/taxRate"
+                        message: The tax rate field is required
       security:
         - tokenAuth: []
     get:
@@ -1182,8 +1195,13 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 2 errors
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/invoiceDate"
+                        message: The invoice date field is required
+                      - field: "#/lineItems/0/taxRate"
+                        message: The tax rate field is required
       security:
         - tokenAuth: []
   "/companies/{companyId}/invoices/{invoiceId}/line-items":
@@ -1275,8 +1293,11 @@ paths:
                 Error:
                   value:
                     code: validation-error
-                    message: Missing required information
+                    message: Validation failed with 1 error
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/taxRate"
+                        message: The tax rate field is required
         "404":
           description: Invoice not found
           content:
@@ -1315,15 +1336,27 @@ paths:
       summary: Add an attachment to an invoice
       description: |
         Adds an attachment to an existing draft invoice. The attachment will be added last in the list of attachments on the invoice.
-        Attached files will appear as additional pages in the final invoice
+        Attached files will appear as additional pages in the final invoice.
 
         Supported file types: jpeg, png and pdf
 
-        Show example of multipart MIME as we do for uploads
+        ### Sample request for adding an attachment to an invoice using multipart MIME
+        ```
+        POST http://api.bokio.se/companies/{companyId}/invoices/{invoiceId}/attachments
+        Content-Type: multipart/form-data; boundary=----FormBoundary7MA4YWxkTrZu0gW
+        Authorization: Bearer <token>
+
+        ------FormBoundary7MA4YWxkTrZu0gW
+        Content-Disposition: form-data; name="file"; filename="receipt.png"
+        Content-Type: image/png
+
+        < ./receipt.png
+        ------FormBoundary7MA4YWxkTrZu0gW--
+        ```
 
         **NOTE:** The invoice must be in draft status.
         Maximum file size is 4 MB and all files can't exceed 10 MB.
-        Dimensions must be less than height of 7016 and width of 4960 in pixels
+        Dimensions must be less than height of 7016 and width of 4960 in pixels.
       operationId: post-invoice-attachment
       parameters:
         - name: Content-Type
@@ -1369,9 +1402,12 @@ paths:
               examples:
                 Error:
                   value:
+                    message: Validation failed with 1 error
                     code: validation-error
-                    message: Missing required information
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/file"
+                        message: Invalid file type. Only application/pdf and image/png files are allowed.
         "404":
           description: The requested resource was not found
           content:
@@ -1969,8 +2005,6 @@ components:
         code:
           type: string
         message:
-          type: string
-        innerCode:
           type: string
         bokioErrorId:
           type: string

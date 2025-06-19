@@ -1,24 +1,24 @@
 openapi: 3.0.3
 info:
-  version: "0.3"
+  version: "0.4"
   title: General API
   description: Bokio General API
   contact:
     name: Bokio
     url: https://docs.bokio.se
     email: support@bokio.se
-externalDocs:
-  url: https://docs.bokio.se
-  description: Read the API Documentation
+servers:
+  - url: https://api.bokio.se
+    description: Bokio API
+    x-bokio-api: true
 tags:
   - name: authorization
     description: Authorization operations for OAuth 2.0 Grants
   - name: connections
     description: Connections operations
-servers:
-  - url: https://api.bokio.se
-    description: Bokio API
-    x-bokio-api: true
+externalDocs:
+  url: https://docs.bokio.se
+  description: Read the API Documentation
 paths:
   /token:
     post:
@@ -221,19 +221,6 @@ components:
       type: http
       scheme: basic
   schemas:
-    pagedResponse:
-      type: object
-      title: pagedResponse
-      properties:
-        totalItems:
-          type: integer
-          format: int32
-        totalPages:
-          type: integer
-          format: int32
-        currentPage:
-          type: integer
-          format: int32
     token:
       type: object
       title: Token
@@ -258,6 +245,19 @@ components:
         refresh_token:
           type: string
           description: Returned for authorization_code and refresh_token grant types. The client_credentials grant expected that refresh are done by making another `/token` request with client_credentials grant.
+    pagedResponse:
+      type: object
+      title: pagedResponse
+      properties:
+        totalItems:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        currentPage:
+          type: integer
+          format: int32
     connection:
       type: object
       properties:
