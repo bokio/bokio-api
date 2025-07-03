@@ -154,6 +154,21 @@ paths:
           description: An opaque value used by the client to maintain state between the request and callback. Required as protection against CSRF (cross-site request forgery) attacks.
           schema:
             type: string
+        - name: bokio_tenantid
+          in: query
+          required: false
+          description: The Bokio tenant ID to authorize the integration to have access. Bokioio company ID will be the teant ID when the tenant_type is `company`.
+          schema:
+            type: string
+            format: uuid
+        - name: bokio_tenanttype
+          in: query
+          required: false
+          description: The Bokio tenant type to authorize the integration to have access. Currently support only `company` tenant type.
+          schema:
+            type: string
+            enum:
+              - company
       responses:
         "302":
           description: Redirects to the client's redirect URI with an authorization code when the user has authorized the client
