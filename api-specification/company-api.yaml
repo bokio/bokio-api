@@ -2161,7 +2161,7 @@ components:
           title: itemRef
           nullable: true
           description: |
-            Identifier of an existing salesItem to use as a template. Fields itemType and quantity are required. Values in other fields will be overridden by values from this referenced item
+            Identifier of an existing salesItem to use as a template. ItemType, Quantity are required. Values in other fields will be overridden by values from this referenced item
           properties:
             id:
               type: string
@@ -2248,7 +2248,7 @@ components:
           type: object
           nullable: true
           description: |
-            Identifier of an existing descriptionOnlyItem to use as a template. The field itemType is required.
+            Identifier of an existing descriptionOnlyItem to use as a template.
           properties:
             id:
               type: string
