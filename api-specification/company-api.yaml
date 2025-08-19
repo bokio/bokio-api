@@ -152,7 +152,7 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
 
             | Field                     | Type        |
             | ------------------------- | ----------- |
@@ -473,7 +473,7 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
 
             | Field                     | Type        |
             | ------------------------- | ----------- |
@@ -726,7 +726,7 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
 
             | Field                | Type        |
             | -------------------- | ----------- |
@@ -1099,8 +1099,8 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
-            View documentation for filtering on metatdata [here](ref:metadata).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
+            View documentation for filtering on metatdata [here](metadata).
 
             | Field                | Type        |
             | -------------------- | ----------- |
@@ -1936,7 +1936,7 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
 
             | Field                | Type        |
             | -------------------- | ----------- |
@@ -2146,7 +2146,7 @@ paths:
           in: query
           required: false
           description: |
-            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
 
             | Field                | Type        |
             | -------------------- | ----------- |
