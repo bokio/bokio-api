@@ -24,6 +24,10 @@ tags:
     description: Operations for managing accounting journal entries
   - name: uploads
     description: Operations for managing file uploads
+  - name: fiscal-years
+    description: Operations for managing fiscal years
+  - name: sie-files
+    description: Operations for managing SIE files
 externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
@@ -48,6 +52,8 @@ paths:
         **Handling validation errors:**
 
         If this operations returns a 400 status code, inspect the response body's api error object for more information. There will be additional information in the innerCode if the code=validation-error.
+
+        **Scope:** `journal-entries:write`
       operationId: post-journalentry
       requestBody:
         description: Post the necessary fields for the API to create a new journal entry.
@@ -120,7 +126,9 @@ paths:
       tags:
         - journal-entries
       summary: Get journal entries
-      description: Get journal entries for the company. Use the query parameters to navigate through the results.
+      description: |-
+        Get journal entries for the company. Use the query parameters to filter and navigate through the results.
+        **Scope:** `journal-entries:read`
       operationId: get-journalentry
       parameters:
         - name: page
@@ -140,6 +148,22 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                     | Type        |
+            | ------------------------- | ----------- |
+            | title                     | string      |
+            | journalEntryNumber        | string      |
+            | date                      | date        |
+            | reversingJournalEntryId   | string      |
+            | reversedByJournalEntryId  | string      |
+          schema:
+            type: string
+          example: title~invoice 1234
       responses:
         "200":
           description: Journal entries found
@@ -178,7 +202,10 @@ paths:
       tags:
         - journal-entries
       summary: Get a journal entry
-      description: Retrieve the information of the journal with the matching journalEntryId.
+      description: |
+        Retrieve the information of the journal with the matching journalEntryId.
+
+        **Scope:** `journal-entries:read`
       operationId: get-journalentries-journalId
       responses:
         "200":
@@ -255,6 +282,8 @@ paths:
         ### Handling validation errors:
 
         If this operation returns a 400 status code, inspect the response body's apiError object for more information. There will be additional information in the innerCode if the code=validation-error.
+
+        **Scope:** `journal-entries:write`
       operationId: reverse-journalentry
       responses:
         "200":
@@ -351,6 +380,8 @@ paths:
 
         ------FormBoundary7MA4YWxkTrZu0gW--
         ```
+
+        **Scope:** `uploads:write`
       operationId: add-upload
       parameters:
         - name: Content-Type
@@ -417,7 +448,9 @@ paths:
       tags:
         - uploads
       summary: Get uploads
-      description: Get all uploads for the company. Use the query parameters to navigate through the results.
+      description: |-
+        Get all uploads for the company. Use the query parameters to filter and navigate through the results.
+        **Scope:** `uploads:read`
       operationId: get-uploads
       parameters:
         - name: page
@@ -436,6 +469,19 @@ paths:
             type: integer
             format: int32
             default: 25
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                     | Type        |
+            | ------------------------- | ----------- |
+            | description               | string      |
+            | journalEntryId            | string      |
+          schema:
+            type: string
+          example: description~Receipt for invoice 1234
       responses:
         "200":
           description: uploads found
@@ -474,7 +520,10 @@ paths:
       tags:
         - uploads
       summary: Get an upload
-      description: Retrieve the information of the upload with the matching uploadId.
+      description: |
+        Retrieve the information of the upload with the matching uploadId.
+
+        **Scope:** `uploads:read`
       operationId: get-upload
       responses:
         "200":
@@ -526,7 +575,10 @@ paths:
       tags:
         - uploads
       summary: Download file data for an upload
-      description: Retrieve the file data of the upload with the matching uploadId.
+      description: |
+        Retrieve the file data of the upload with the matching uploadId.
+
+        **Scope:** `uploads:read`
       operationId: download-upload
       responses:
         "200":
@@ -564,7 +616,10 @@ paths:
       tags:
         - customers
       summary: Create a customer
-      description: Creates a customer for the company.
+      description: |
+        Creates a customer for the company.
+
+        **Scope:** `customers:write`
       operationId: post-customer
       requestBody:
         description: Post the necessary fields for the API to create a customer.
@@ -645,7 +700,9 @@ paths:
       tags:
         - customers
       summary: Get customers
-      description: Get all customers for the company. Use the query parameters to navigate through the results.
+      description: |-
+        Get all customers for the company. Use the query parameters to filter and navigate through the results.
+        **Scope:** `customers:read`
       operationId: get-customer
       parameters:
         - name: page
@@ -665,6 +722,21 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | name                 | string      |
+            | type                 | string      |
+            | vatNumber            | string      |
+            | orgNumber            | string      |
+          schema:
+            type: string
+          example: name==customer 1
       responses:
         "200":
           description: Customers found
@@ -703,7 +775,10 @@ paths:
       tags:
         - customers
       summary: Get a customer
-      description: Retrieve the information of the customer with the matching customerId.
+      description: |
+        Retrieve the information of the customer with the matching customerId.
+
+        **Scope:** `customers:read`
       operationId: get-customers-customerId
       responses:
         "200":
@@ -752,7 +827,10 @@ paths:
       tags:
         - customers
       summary: Update a customer
-      description: Update an existing customer for the company.
+      description: |
+        Update an existing customer for the company.
+
+        **Scope:** `customers:write`
       operationId: put-customer
       requestBody:
         description: Post the necessary fields for the API to update a customer.
@@ -840,6 +918,8 @@ paths:
         Delete an existing customer for the company.
 
         NOTE: Currently only supports deleting customers that have been added through the API.
+
+        **Scope:** `customers:write`
       operationId: delete-customer
       responses:
         "204":
@@ -862,6 +942,8 @@ paths:
       summary: Create an invoice
       description: |
         Creates an new draft invoice for the company.
+
+        **Scope:** `invoices:write`
       operationId: post-invoice
       requestBody:
         description: Post the necessary fields for the API to create a new invoice.
@@ -872,10 +954,12 @@ paths:
             examples:
               New invoice:
                 value:
+                  type: invoice
                   customerRef:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
                   invoiceNumber: "1234"
+                  orderNumberReference: ORD-5678
                   currency: SEK
                   currencyRate: 1
                   totalAmount: 200
@@ -895,6 +979,16 @@ paths:
                       taxRate: 25
                     - description: A description line
                       itemType: descriptionOnlyItem
+                  deliveryAddress:
+                    line1: Delivery Street 15
+                    line2: Floor 2
+                    city: Stockholm
+                    postalCode: 111 11
+                    country: SE
+                  metadata:
+                    project: Website Redesign
+                    department: IT
+                    externalId: EXT-INV-2024-001
       responses:
         "200":
           description: Invoice created
@@ -906,10 +1000,12 @@ paths:
                 invoice created:
                   value:
                     id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    type: invoice
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
                     invoiceNumber: "1234"
+                    orderNumberReference: ORD-5678
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -939,11 +1035,21 @@ paths:
                       city: Göteborg
                       postalCode: 123 45
                       country: SE
+                    deliveryAddress:
+                      line1: Delivery Street 15
+                      line2: Floor 2
+                      city: Stockholm
+                      postalCode: 111 11
+                      country: SE
                     attachmentRefs:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         fileName: myfile.pdf
                       - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
                         fileName: myfile2.pdf
+                    metadata:
+                      project: Website Redesign
+                      department: IT
+                      externalId: EXT-INV-2024-001
         "400":
           description: Missing required information
           content:
@@ -967,7 +1073,9 @@ paths:
       tags:
         - invoices
       summary: Get invoices
-      description: Get all invoices for the company. Use the query parameters to navigate through the results.
+      description: |-
+        Get all invoices for the company. Use the query parameters to filter and navigate through the results.
+        **Scope:** `invoices:read`
       operationId: get-invoice
       parameters:
         - name: page
@@ -987,6 +1095,27 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+            View documentation for filtering on metatdata [here](ref:metadata).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | type                 | string      |
+            | customerRef          | string      |
+            | orderNumberReference | string      |
+            | currency             | string      |
+            | totalAmount          | number      |
+            | status               | string      |
+            | invoiceDate          | date        |
+            | dueDate              | date        |
+            | metadata             | string      |
+          schema:
+            type: string
+          example: dueDate==2024-10-10&&currency==SEK
       responses:
         "200":
           description: Invoices found
@@ -1025,7 +1154,10 @@ paths:
       tags:
         - invoices
       summary: Get an invoice
-      description: Retrieve the information of the invoice with the matching invoiceId.
+      description: |
+        Retrieve the information of the invoice with the matching invoiceId.
+
+        **Scope:** `invoices:read`
       operationId: get-invoices-invoiceId
       responses:
         "200":
@@ -1038,10 +1170,12 @@ paths:
                 Update invoice:
                   value:
                     id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    type: invoice
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
                     invoiceNumber: "1234"
+                    orderNumberReference: ORD-5678
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -1070,11 +1204,21 @@ paths:
                       city: Göteborg
                       postalCode: 123 45
                       country: SE
+                    deliveryAddress:
+                      line1: Delivery Street 15
+                      line2: Floor 2
+                      city: Stockholm
+                      postalCode: 111 11
+                      country: SE
                     attachmentRefs:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         fileName: myfile.pdf
                       - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
                         fileName: myfile2.pdf
+                    metadata:
+                      project: Website Redesign
+                      department: IT
+                      externalId: EXT-INV-2024-001
         "404":
           description: Invoice not found
           content:
@@ -1100,6 +1244,8 @@ paths:
         to the invoice first to get the current state of the invoice and then update the fields you want to change.
 
         **NOTE:** It's only possible to update invoices that are in draft status.
+
+        **Scope:** `invoices:write`
       operationId: put-invoice
       requestBody:
         description: Post the necessary fields for the API to update an invoice.
@@ -1111,10 +1257,12 @@ paths:
               Update invoice:
                 value:
                   id: a419cf69-db6f-4de9-992c-b1a60942a443
+                  type: invoice
                   customerRef:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
                   invoiceNumber: "1234"
+                  orderNumberReference: ORD-5678
                   currency: SEK
                   currencyRate: 1
                   totalAmount: 200
@@ -1136,6 +1284,16 @@ paths:
                         id: e964435e-50ef-4524-a439-05ff87794952
                       description: A description line
                       itemType: descriptionOnlyItem
+                  deliveryAddress:
+                    line1: Delivery Street 15
+                    line2: Floor 2
+                    city: Stockholm
+                    postalCode: 111 11
+                    country: SE
+                  metadata:
+                    project: Website Redesign
+                    department: IT
+                    externalId: EXT-INV-2024-001
       responses:
         "200":
           description: Invoice updated
@@ -1147,11 +1305,13 @@ paths:
                 Update invoice:
                   value:
                     id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    type: invoice
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
                     status: draft
                     invoiceNumber: "1234"
+                    orderNumberReference: ORD-5678
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -1180,11 +1340,21 @@ paths:
                       city: Göteborg
                       postalCode: 123 45
                       country: SE
+                    deliveryAddress:
+                      line1: Delivery Street 15
+                      line2: Floor 2
+                      city: Stockholm
+                      postalCode: 111 11
+                      country: SE
                     attachmentRefs:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
                         fileName: myfile.pdf
                       - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
                         fileName: myfile2.pdf
+                    metadata:
+                      project: Website Redesign
+                      department: IT
+                      externalId: EXT-INV-2024-001
         "400":
           description: Missing required information
           content:
@@ -1230,6 +1400,8 @@ paths:
         Adds a line item to an existing draft invoice. The item will be added last in the list of line items on the invoice.
 
         **NOTE:** The invoice must be in draft status.
+
+        **Scope:** `invoices:write`
       operationId: post-invoice-lineItem
       requestBody:
         description: Post the necessary fields for the API to add a line item to an invoice.
@@ -1345,6 +1517,8 @@ paths:
         **NOTE:** The invoice must be in draft status.
         Maximum file size is 4 MB and all files can't exceed 10 MB.
         Dimensions must be less than height of 7016 and width of 4960 in pixels
+
+        **Scope:** `invoices:write`
       operationId: post-invoice-attachment
       parameters:
         - name: Content-Type
@@ -1416,7 +1590,10 @@ paths:
       tags:
         - invoices
       summary: Get attachments
-      description: Retrieve the information of the attachments for the invoice. Use the query parameters to navigate through the results.
+      description: |
+        Retrieve the information of the attachments for the invoice. Use the query parameters to filter and navigate through the results.
+
+        **Scope:** `invoices:read`
       operationId: get-invoice-attachments
       parameters:
         - name: page
@@ -1436,6 +1613,18 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                     | Type        |
+            | ------------------------- | ----------- |
+            | fileName                  | string      |
+          schema:
+            type: string
+          example: fileName~faktura
       responses:
         "200":
           description: Attachments found
@@ -1507,7 +1696,10 @@ paths:
       tags:
         - invoices
       summary: Get an attachment
-      description: Retrieve the information of the attachment with the matching attachmentId.
+      description: |
+        Retrieve the information of the attachment with the matching attachmentId.
+
+        **Scope:** `invoices:read`
       operationId: get-invoice-attachment
       responses:
         "200":
@@ -1549,6 +1741,8 @@ paths:
         Deletes an attachment from an existing draft invoice.
 
         **NOTE:** The invoice must be in draft status.
+
+        **Scope:** `invoices:write`
       operationId: delete-invoice-attachment
       responses:
         "204":
@@ -1602,7 +1796,10 @@ paths:
       tags:
         - invoices
       summary: Download an attachment from an invoice
-      description: Download the attachment with the matching attachmentId.
+      description: |
+        Download the attachment with the matching attachmentId.
+
+        **Scope:** `invoices:read`
       operationId: download-invoice-attachment
       responses:
         "200":
@@ -1648,7 +1845,10 @@ paths:
       tags:
         - items
       summary: Create an item
-      description: Creates a new item for the company.
+      description: |
+        Creates a new item for the company.
+
+        **Scope:** `items:write`
       operationId: post-item
       requestBody:
         description: Post the necessary fields for the API to create a new item.
@@ -1709,7 +1909,10 @@ paths:
       tags:
         - items
       summary: Get items
-      description: Get all items for the company. Use the query parameters to navigate through the results.
+      description: |
+        Get all items for the company. Use the query parameters to filter and navigate through the results.
+
+        **Scope:** `items:read`
       operationId: get-items
       parameters:
         - name: page
@@ -1729,6 +1932,23 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | description          | string      |
+            | itemType             | string      |
+            | productType          | string      |
+            | unitType             | string      |
+            | unitPrice            | number      |
+            | taxRate              | number      |
+          schema:
+            type: string
+          example: description~Product 1
       responses:
         "200":
           description: Items found
@@ -1768,7 +1988,10 @@ paths:
       tags:
         - items
       summary: Get an item
-      description: Retrieve the information of the item with the matching itemId.
+      description: |
+        Retrieve the information of the item with the matching itemId.
+
+        **Scope:** `items:read`
       operationId: get-items-itemId
       responses:
         "200":
@@ -1806,7 +2029,10 @@ paths:
       tags:
         - items
       summary: Update an item
-      description: Update an existing item for the company.
+      description: |
+        Update an existing item for the company.
+
+        **Scope:** `items:write`
       operationId: put-item
       requestBody:
         description: Post the necessary fields for the API to update an Item.
@@ -1868,11 +2094,183 @@ paths:
       tags:
         - items
       summary: Delete an item
-      description: Delete an existing item for the company.
+      description: |
+        Delete an existing item for the company.
+
+        **Scope:** `items:write`
       operationId: delete-item
       responses:
         "204":
           description: Item deleted
+      security:
+        - tokenAuth: []
+  "/v1/companies/{companyId}/fiscal-years":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+    get:
+      tags:
+        - fiscal-years
+      summary: Get fiscal years
+      description: |
+        Get all fiscal years for the company. Use the query parameters to filter and navigate through the results.
+
+
+        **Scope:** `fiscal-years:read`
+      operationId: get-fiscal-years
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](ref:filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | startDate            | date      |
+            | endDate              | date      |
+            | accountingMethod     | string      |
+            | status               | string      |
+          schema:
+            type: string
+          example: status==open
+      responses:
+        "200":
+          description: Successful response with fiscal years
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          oneOf:
+                            - $ref: "#/components/schemas/fiscalYear"
+      security:
+        - tokenAuth: []
+  "/v1/companies/{companyId}/fiscal-years/{fiscalYearId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      - name: fiscalYearId
+        in: path
+        required: true
+        description: The unique identifier for the fiscal year
+        schema:
+          type: string
+          format: uuid
+          example: fd5cf0c4-d68f-48d7-b01d-ed478c268d9e
+    get:
+      tags:
+        - fiscal-years
+      summary: Get a fiscal year
+      description: |
+        Retrieve the information of the fiscal year with the matching fiscalYearId
+
+        **Scope:** `fiscal-years:read`
+      operationId: get-fiscal-year-with-id
+      responses:
+        "200":
+          description: Successful response with fiscal year information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  fiscalYear:
+                    $ref: "#/components/schemas/fiscalYear"
+        "404":
+          description: Fiscal year not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: Fiscal year not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/v1/companies/{companyId}/sie/{fiscalYearId}/download":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+      - name: fiscalYearId
+        in: path
+        required: true
+        description: The unique identifier for the fiscal year
+        schema:
+          type: string
+          format: uuid
+          example: 835ba700-b306-4bd9-8447-59207b6b0002
+    get:
+      tags:
+        - sie-files
+      summary: Download SIE file for a fiscal year
+      description: |
+        This endpoint downloads the SIE file for the provided fiscal year.
+        The SIE file is used for accounting purposes in Sweden.
+
+        **Scope:** `sie:read`
+      operationId: download-sie-file
+      responses:
+        "200":
+          description: Successful response with a SIE file stream
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Fiscal year not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                FiscalYearNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource with value 240a4af0-edfd-47b1-b4ab-f30450eaac19 was not found
+                    bokioErrorId: 8d408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
 components:
@@ -1904,12 +2302,15 @@ components:
         totalItems:
           type: integer
           format: int32
+          example: 1
         totalPages:
           type: integer
           format: int32
+          example: 1
         currentPage:
           type: integer
           format: int32
+          example: 1
     journalEntryItem:
       type: object
       title: journalEntryItem
@@ -2146,7 +2547,7 @@ components:
           title: itemRef
           nullable: true
           description: |
-            Identifier of an existing salesItem to use as a template. ItemType, Quantity are required. Values in other fields will be overridden by values from this referenced item
+            Identifier of an existing salesItem to use as a template. Fields itemType and quantity are required. Values in other fields will be overridden by values from this referenced item
           properties:
             id:
               type: string
@@ -2233,7 +2634,7 @@ components:
           type: object
           nullable: true
           description: |
-            Identifier of an existing descriptionOnlyItem to use as a template.
+            Identifier of an existing descriptionOnlyItem to use as a template. The field itemType is required.
           properties:
             id:
               type: string
@@ -2275,6 +2676,13 @@ components:
           type: string
           format: uuid
           readOnly: true
+        type:
+          type: string
+          default: invoice
+          enum:
+            - invoice
+            - cashInvoice
+          description: The type of the invoice can be invoice or cashInvoice. Can only be set to invoice when creating a new invoice and will default to invoice if not set.
         customerRef:
           type: object
           properties:
@@ -2289,6 +2697,9 @@ components:
           readOnly: true
           nullable: true
           description: The invoice number will be generated at the time of publishing the invoice.
+        orderNumberReference:
+          type: string
+          description: The order number associated with the invoice.
         currency:
           description: ISO 4217 currency code
           type: string
@@ -2337,6 +2748,9 @@ components:
           readOnly: true
           oneOf:
             - $ref: "#/components/schemas/address"
+        deliveryAddress:
+          oneOf:
+            - $ref: "#/components/schemas/address"
         attachmentRefs:
           type: array
           readOnly: true
@@ -2350,12 +2764,25 @@ components:
               name:
                 type: string
                 readOnly: true
+        metadata:
+          type: object
+          description: |
+            Metadata fields for the invoice as string key-value pairs. These fields can be used for filtering.All metadata keys must
+            start with a letter or underscore and contain only alphanumeric characters and underscores.
+          additionalProperties:
+            type: string
+          example:
+            project: Website Redesign
+            department: IT
+            externalId: EXT-INV-2024-001
       example:
         id: a419cf69-db6f-4de9-992c-b1a60942a443
+        type: invoice
         customerRef:
           id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
           name: customer 1
         invoiceNumber: "1234"
+        orderNumberReference: ORD-5678
         currency: SEK
         currencyRate: 1
         totalAmount: 200
@@ -2388,11 +2815,21 @@ components:
           city: Göteborg
           postalCode: 123 45
           country: SE
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
         attachmentRefs:
           - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
             fileName: myfile.pdf
           - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
             fileName: myfile2.pdf
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
     invoiceAttachment:
       type: object
       title: invoiceAttachment
@@ -2509,6 +2946,54 @@ components:
       oneOf:
         - $ref: "#/components/schemas/salesItem"
         - $ref: "#/components/schemas/descriptionOnlyItem"
+    fiscalYear:
+      title: Fiscal Year
+      type: object
+      required:
+        - id
+        - startDate
+        - endDate
+        - accountingMethod
+        - vatSetting
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the fiscal year
+        startDate:
+          type: string
+          format: date
+          description: The start date of the fiscal year
+        endDate:
+          type: string
+          format: date
+          description: The end date of the fiscal year
+        accountingMethod:
+          type: string
+          enum:
+            - cash
+            - accrual
+          description: The accounting method used by the fiscal year
+        vatSetting:
+          type: string
+          enum:
+            - monthly
+            - quarterly
+            - yearly
+          description: The VAT setting for the fiscal year
+        status:
+          type: string
+          enum:
+            - open
+            - closed
+          description: The status of the fiscal year
+      example:
+        id: 123e4567-e89b-12d3-a456-426614174000
+        startDate: 2023-01-01
+        endDate: 2023-12-31
+        accountingMethod: accrual
+        vatSetting: quarterly
+        status: open
 x-readme:
   explorer-enabled: true
   proxy-enabled: false
