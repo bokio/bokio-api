@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: "0.4"
+  version: "1.0"
   title: Company API
   description: The Bokio Company API containing all resources for company tenant.
   contact:
@@ -28,7 +28,7 @@ externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
 paths:
-  "/companies/{companyId}/journal-entries":
+  "/v1/companies/{companyId}/journal-entries":
     parameters:
       - name: companyId
         in: path
@@ -156,7 +156,7 @@ paths:
                           $ref: "#/components/schemas/journalEntry"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/journal-entries/{journalEntryId}":
+  "/v1/companies/{companyId}/journal-entries/{journalEntryId}":
     parameters:
       - name: companyId
         in: path
@@ -221,7 +221,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/journal-entries/{journalEntryId}/reverse":
+  "/v1/companies/{companyId}/journal-entries/{journalEntryId}/reverse":
     parameters:
       - name: companyId
         in: path
@@ -310,7 +310,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/uploads":
+  "/v1/companies/{companyId}/uploads":
     parameters:
       - name: companyId
         in: path
@@ -452,7 +452,7 @@ paths:
                           $ref: "#/components/schemas/upload"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/uploads/{uploadId}":
+  "/v1/companies/{companyId}/uploads/{uploadId}":
     parameters:
       - name: companyId
         in: path
@@ -504,7 +504,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/uploads/{uploadId}/download":
+  "/v1/companies/{companyId}/uploads/{uploadId}/download":
     parameters:
       - name: companyId
         in: path
@@ -550,7 +550,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/customers":
+  "/v1/companies/{companyId}/customers":
     parameters:
       - name: companyId
         in: path
@@ -681,7 +681,7 @@ paths:
                           $ref: "#/components/schemas/customer"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/customers/{customerId}":
+  "/v1/companies/{companyId}/customers/{customerId}":
     parameters:
       - name: companyId
         in: path
@@ -846,7 +846,7 @@ paths:
           description: Customer deleted
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices":
+  "/v1/companies/{companyId}/invoices":
     parameters:
       - name: companyId
         in: path
@@ -1003,7 +1003,7 @@ paths:
                           $ref: "#/components/schemas/invoice"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices/{invoiceId}":
+  "/v1/companies/{companyId}/invoices/{invoiceId}":
     parameters:
       - name: companyId
         in: path
@@ -1204,7 +1204,7 @@ paths:
                         message: The tax rate field is required
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices/{invoiceId}/line-items":
+  "/v1/companies/{companyId}/invoices/{invoiceId}/line-items":
     parameters:
       - name: companyId
         in: path
@@ -1312,7 +1312,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices/{invoiceId}/attachments":
+  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments":
     parameters:
       - name: companyId
         in: path
@@ -1336,27 +1336,15 @@ paths:
       summary: Add an attachment to an invoice
       description: |
         Adds an attachment to an existing draft invoice. The attachment will be added last in the list of attachments on the invoice.
-        Attached files will appear as additional pages in the final invoice.
+        Attached files will appear as additional pages in the final invoice
 
         Supported file types: jpeg, png and pdf
 
-        ### Sample request for adding an attachment to an invoice using multipart MIME
-        ```
-        POST http://api.bokio.se/companies/{companyId}/invoices/{invoiceId}/attachments
-        Content-Type: multipart/form-data; boundary=----FormBoundary7MA4YWxkTrZu0gW
-        Authorization: Bearer <token>
-
-        ------FormBoundary7MA4YWxkTrZu0gW
-        Content-Disposition: form-data; name="file"; filename="receipt.png"
-        Content-Type: image/png
-
-        < ./receipt.png
-        ------FormBoundary7MA4YWxkTrZu0gW--
-        ```
+        Show example of multipart MIME as we do for uploads
 
         **NOTE:** The invoice must be in draft status.
         Maximum file size is 4 MB and all files can't exceed 10 MB.
-        Dimensions must be less than height of 7016 and width of 4960 in pixels.
+        Dimensions must be less than height of 7016 and width of 4960 in pixels
       operationId: post-invoice-attachment
       parameters:
         - name: Content-Type
@@ -1402,12 +1390,9 @@ paths:
               examples:
                 Error:
                   value:
-                    message: Validation failed with 1 error
                     code: validation-error
+                    message: Missing required information
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
-                    errors:
-                      - field: "#/file"
-                        message: Invalid file type. Only application/pdf and image/png files are allowed.
         "404":
           description: The requested resource was not found
           content:
@@ -1492,7 +1477,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}":
+  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}":
     parameters:
       - name: companyId
         in: path
@@ -1587,7 +1572,7 @@ paths:
                     bokioErrorId: 3b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}/download":
+  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}/download":
     parameters:
       - name: companyId
         in: path
@@ -1649,7 +1634,7 @@ paths:
                     bokioErrorId: 869a69a3-632b-4a09-899e-9dc03342b5dc
       security:
         - tokenAuth: []
-  "/companies/{companyId}/items":
+  "/v1/companies/{companyId}/items":
     parameters:
       - name: companyId
         in: path
@@ -1761,7 +1746,7 @@ paths:
                             - $ref: "#/components/schemas/item"
       security:
         - tokenAuth: []
-  "/companies/{companyId}/items/{itemId}":
+  "/v1/companies/{companyId}/items/{itemId}":
     parameters:
       - name: companyId
         in: path

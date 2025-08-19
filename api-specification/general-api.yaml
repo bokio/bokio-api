@@ -1,6 +1,6 @@
 openapi: 3.0.3
 info:
-  version: "0.4"
+  version: "1.0"
   title: General API
   description: Bokio General API
   contact:
@@ -168,7 +168,7 @@ paths:
                     type: string
                   error_description:
                     type: string
-  /connections:
+  /v1/connections:
     get:
       tags:
         - connections
