@@ -8,7 +8,7 @@ info:
     url: https://docs.bokio.se
     email: support@bokio.se
 servers:
-  - url: https://api.bokio.se
+  - url: https://api.bokio.se/v1
     description: Bokio API
     x-bokio-api: true
 tags:
@@ -183,7 +183,7 @@ paths:
                     type: string
                   error_description:
                     type: string
-  /v1/connections:
+  /connections:
     get:
       tags:
         - connections

@@ -8,7 +8,7 @@ info:
     url: https://docs.bokio.se
     email: support@bokio.se
 servers:
-  - url: https://api.bokio.se
+  - url: https://api.bokio.se/v1
     description: Bokio API
     x-bokio-api: true
 security:
@@ -36,7 +36,7 @@ externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
 paths:
-  "/v1/companies/{companyId}/journal-entries":
+  "/companies/{companyId}/journal-entries":
     parameters:
       - name: companyId
         in: path
@@ -184,7 +184,7 @@ paths:
                           $ref: "#/components/schemas/journalEntry"
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/journal-entries/{journalEntryId}":
+  "/companies/{companyId}/journal-entries/{journalEntryId}":
     parameters:
       - name: companyId
         in: path
@@ -252,7 +252,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/journal-entries/{journalEntryId}/reverse":
+  "/companies/{companyId}/journal-entries/{journalEntryId}/reverse":
     parameters:
       - name: companyId
         in: path
@@ -343,7 +343,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/uploads":
+  "/companies/{companyId}/uploads":
     parameters:
       - name: companyId
         in: path
@@ -502,7 +502,7 @@ paths:
                           $ref: "#/components/schemas/upload"
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/uploads/{uploadId}":
+  "/companies/{companyId}/uploads/{uploadId}":
     parameters:
       - name: companyId
         in: path
@@ -557,7 +557,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/uploads/{uploadId}/download":
+  "/companies/{companyId}/uploads/{uploadId}/download":
     parameters:
       - name: companyId
         in: path
@@ -606,7 +606,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/customers":
+  "/companies/{companyId}/customers":
     parameters:
       - name: companyId
         in: path
@@ -757,7 +757,7 @@ paths:
                           $ref: "#/components/schemas/customer"
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/customers/{customerId}":
+  "/companies/{companyId}/customers/{customerId}":
     parameters:
       - name: companyId
         in: path
@@ -930,7 +930,7 @@ paths:
           description: Customer deleted
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/invoices":
+  "/companies/{companyId}/invoices":
     parameters:
       - name: companyId
         in: path
@@ -1140,7 +1140,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:read
-  "/v1/companies/{companyId}/invoices/{invoiceId}":
+  "/companies/{companyId}/invoices/{invoiceId}":
     parameters:
       - name: companyId
         in: path
@@ -1386,7 +1386,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/line-items":
+  "/companies/{companyId}/invoices/{invoiceId}/line-items":
     parameters:
       - name: companyId
         in: path
@@ -1498,7 +1498,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments":
+  "/companies/{companyId}/invoices/{invoiceId}/attachments":
     parameters:
       - name: companyId
         in: path
@@ -1684,7 +1684,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:read
-  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}":
+  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}":
     parameters:
       - name: companyId
         in: path
@@ -1788,7 +1788,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}/download":
+  "/companies/{companyId}/invoices/{invoiceId}/attachments/{attachmentId}/download":
     parameters:
       - name: companyId
         in: path
@@ -1855,7 +1855,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/publish":
+  "/companies/{companyId}/invoices/{invoiceId}/publish":
     parameters:
       - name: companyId
         in: path
@@ -1905,7 +1905,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/payments":
+  "/companies/{companyId}/invoices/{invoiceId}/payments":
     parameters:
       - name: companyId
         in: path
@@ -1931,7 +1931,7 @@ paths:
         Creates a new payment record for the specified invoice. Use the bookkeepingAccountNumber field to specify an accounting account other than the default account (1930).
 
         **Scope:** `invoices:write`
-      operationId: post-invoices-invoiceId-payments
+      operationId: post-invoice-payment
       requestBody:
         description: Payment information
         content:
@@ -1975,7 +1975,7 @@ paths:
         Retrieves all payment records for the specified invoice.
 
         **Scope:** `invoices:read`
-      operationId: get-invoices-invoiceId-payments
+      operationId: get-invoice-payments
       parameters:
         - name: page
           in: query
@@ -2031,7 +2031,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:read
-  "/v1/companies/{companyId}/invoices/{invoiceId}/payments/{paymentId}":
+  "/companies/{companyId}/invoices/{invoiceId}/payments/{paymentId}":
     parameters:
       - name: companyId
         in: path
@@ -2065,7 +2065,7 @@ paths:
         Retrieves a specific payment record for the invoice.
 
         **Scope:** `invoices:read`
-      operationId: get-invoices-invoiceId-payments-paymentId
+      operationId: get-invoice-payment
       responses:
         "200":
           description: Payment found
@@ -2091,7 +2091,7 @@ paths:
         Deletes a payment record for the invoice.
 
         **Scope:** `invoices:write`
-      operationId: delete-invoices-invoiceId-payments-paymentId
+      operationId: delete-invoice-payment
       responses:
         "204":
           description: Payment deleted successfully
@@ -2105,7 +2105,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/invoices/{invoiceId}/settlements":
+  "/companies/{companyId}/invoices/{invoiceId}/settlements":
     parameters:
       - name: companyId
         in: path
@@ -2132,8 +2132,8 @@ paths:
 
         > 📘 Settlement types that can be created in Bokio API
         > - `currency`
-        > - `bankfee`
-      operationId: create-invoice-settlement-v1
+        > - `bankFee`
+      operationId: post-invoice-settlement
       security:
         - tokenAuth: []
         - access_token:
@@ -2147,12 +2147,12 @@ paths:
             examples:
               New settlement:
                 value:
-                  type: bankfee
-                  settlementDetails:
+                  type: bankFee
+                  invoiceSettlementDetails:
                     date: 2024-10-15
                     sumBaseCurrency: 100
       responses:
-        "201":
+        "200":
           description: Settlement created successfully
           content:
             application/json:
@@ -2163,8 +2163,8 @@ paths:
                   value:
                     id: c529df79-eb7f-5ef0-a8dc-c2b71f953554
                     invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
-                    type: bankfee
-                    settlementDetails:
+                    type: bankFee
+                    invoiceSettlementDetails:
                       date: 2024-10-15
                       sumBaseCurrency: 100
         "400":
@@ -2187,7 +2187,7 @@ paths:
         Get all settlements for the invoice. Use the query parameters to filter and navigate through the results.
 
         **Scope:** `invoices:read`
-      operationId: list-invoice-settlements-v1
+      operationId: get-invoice-settlements
       security:
         - tokenAuth: []
         - access_token:
@@ -2249,7 +2249,7 @@ paths:
                     code: not-found
                     message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
-  "/v1/companies/{companyId}/settlements/{settlementId}":
+  "/companies/{companyId}/invoices/{invoiceId}/settlements/{settlementId}":
     parameters:
       - name: companyId
         in: path
@@ -2259,6 +2259,14 @@ paths:
           type: string
           format: uuid
         example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
       - name: settlementId
         in: path
         required: true
@@ -2275,7 +2283,7 @@ paths:
         Retrieve the information of the specific settlement with the matching settlementd.
 
         **Scope:** `invoices:read`
-      operationId: get-settlement-v1
+      operationId: get-invoice-settlement
       security:
         - tokenAuth: []
         - access_token:
@@ -2312,7 +2320,7 @@ paths:
         Delete an existing settlement.
 
         **Scope:** `invoices:write`
-      operationId: delete-settlement-v1
+      operationId: delete-invoice-settlement
       security:
         - tokenAuth: []
         - access_token:
@@ -2337,7 +2345,7 @@ paths:
                     code: not-found
                     message: The requested resource settlement with value c529df79-eb7f-5ef0-a8dc-c2b71f953554 was not found
                     bokioErrorId: 8d408943-7a1e-47ac-85a7-ac52b2c210d3
-  "/v1/companies/{companyId}/invoices/{invoiceId}/credit":
+  "/companies/{companyId}/invoices/{invoiceId}/credit":
     parameters:
       - name: companyId
         in: path
@@ -2443,7 +2451,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
-  "/v1/companies/{companyId}/credit-notes":
+  "/companies/{companyId}/credit-notes":
     parameters:
       - name: companyId
         in: path
@@ -2519,7 +2527,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - credit-notes:read
-  "/v1/companies/{companyId}/credit-notes/{creditNoteId}":
+  "/companies/{companyId}/credit-notes/{creditNoteId}":
     parameters:
       - name: companyId
         in: path
@@ -2644,7 +2652,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - credit-notes:write
-  "/v1/companies/{companyId}/credit-notes/{creditNoteId}/publish":
+  "/companies/{companyId}/credit-notes/{creditNoteId}/publish":
     parameters:
       - name: companyId
         in: path
@@ -2694,7 +2702,7 @@ paths:
         - tokenAuth: []
         - access_token:
             - credit-notes:write
-  "/v1/companies/{companyId}/items":
+  "/companies/{companyId}/items":
     parameters:
       - name: companyId
         in: path
@@ -2829,7 +2837,7 @@ paths:
                             - $ref: "#/components/schemas/item"
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/items/{itemId}":
+  "/companies/{companyId}/items/{itemId}":
     parameters:
       - name: companyId
         in: path
@@ -2967,7 +2975,7 @@ paths:
           description: Item deleted
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/fiscal-years":
+  "/companies/{companyId}/fiscal-years":
     parameters:
       - name: companyId
         in: path
@@ -3037,7 +3045,7 @@ paths:
                             - $ref: "#/components/schemas/fiscalYear"
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/fiscal-years/{fiscalYearId}":
+  "/companies/{companyId}/fiscal-years/{fiscalYearId}":
     parameters:
       - name: companyId
         in: path
@@ -3086,7 +3094,7 @@ paths:
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/sie/{fiscalYearId}/download":
+  "/companies/{companyId}/sie/{fiscalYearId}/download":
     parameters:
       - name: companyId
         in: path
@@ -3136,7 +3144,7 @@ paths:
                     bokioErrorId: 8d408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/bank-payments":
+  "/companies/{companyId}/bank-payments":
     parameters:
       - name: companyId
         in: path
@@ -3296,7 +3304,7 @@ paths:
                         message: The provided filter 'amount===oops' is not valid. Please check the format of the query parameter
       security:
         - tokenAuth: []
-  "/v1/companies/{companyId}/bank-payments/{bankPaymentId}":
+  "/companies/{companyId}/bank-payments/{bankPaymentId}":
     parameters:
       - name: companyId
         in: path
@@ -3709,6 +3717,7 @@ components:
           format: double
         bookkeepingAccountNumber:
           type: integer
+          nullable: true
           format: int32
           description: Use the `bookkeepingAccountNumber` field in the line items to specify an accounting account other than the account that would be automatically be selected based on the item productType, taxRate, customer and company settings. Accounts that would be automatically selected cannot be set on this field.
       example:
@@ -4025,7 +4034,7 @@ components:
       type: object
       required:
         - type
-        - settlementDetails
+        - invoiceSettlementDetails
       properties:
         id:
           type: string
@@ -4041,8 +4050,8 @@ components:
           type: string
           enum:
             - currency
-            - bankfee
-            - baddebt
+            - bankFee
+            - badDebt
             - balanceAdjustment
           description: |
             The type of the settlement.
@@ -4057,23 +4066,23 @@ components:
 
             > 📘 Settlement types that can be created in Bokio API
             > - `currency`
-            > - `bankfee`
-        settlementDetails:
+            > - `bankFee`
+        invoiceSettlementDetails:
           oneOf:
             - $ref: "#/components/schemas/standardSettlementDetails"
           discriminator:
             propertyName: reason
             mapping:
               currency: "#/components/schemas/standardSettlementDetails"
-              bankfee: "#/components/schemas/standardSettlementDetails"
-              baddebt: "#/components/schemas/standardSettlementDetails"
+              bankFee: "#/components/schemas/standardSettlementDetails"
+              badDebt: "#/components/schemas/standardSettlementDetails"
               balanceAdjustment: "#/components/schemas/standardSettlementDetails"
           description: The settlement details specific to the settlement type
       example:
         id: c529df79-eb7f-5ef0-a8dc-c2b71f953554
         invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
-        type: bankfee
-        settlementDetails:
+        type: bankFee
+        invoiceSettlementDetails:
           date: 2024-10-15
           sumBaseCurrency: 15.5
     creditNote:
