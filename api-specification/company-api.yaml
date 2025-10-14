@@ -4363,7 +4363,6 @@ components:
         - startDate
         - endDate
         - accountingMethod
-        - vatSetting
       properties:
         id:
           type: string
@@ -4383,13 +4382,6 @@ components:
             - cash
             - accrual
           description: The accounting method used by the fiscal year
-        vatSetting:
-          type: string
-          enum:
-            - monthly
-            - quarterly
-            - yearly
-          description: The VAT setting for the fiscal year
         status:
           type: string
           enum:
@@ -4401,7 +4393,6 @@ components:
         startDate: 2023-01-01
         endDate: 2023-12-31
         accountingMethod: accrual
-        vatSetting: quarterly
         status: open
     bankgiroRecipient:
       type: object
