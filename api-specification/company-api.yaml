@@ -2133,6 +2133,8 @@ paths:
         > 📘 Settlement types that can be created in Bokio API
         > - `currency`
         > - `bankFee`
+
+        **Scope:** `invoices:write`
       operationId: post-invoice-settlement
       security:
         - tokenAuth: []
