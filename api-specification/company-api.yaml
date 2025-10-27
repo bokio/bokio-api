@@ -32,6 +32,8 @@ tags:
     description: Operations for creating and reading bank payments
   - name: credit-notes
     description: Operations for managing credit notes
+  - name: chart-of-accounts
+    description: Operations for managing chart of accounts
 externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
@@ -445,7 +447,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
                     errors:
                       - field: "#/file"
-                        message: Invalid file type. Only application/pdf and image/png files are allowed.
+                        message: Invalid file type. Only application/pdf, image/jpeg and image/png files are allowed.
       security:
         - tokenAuth: []
     get:
@@ -3369,6 +3371,514 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
+  "/companies/{companyId}/invoices/{invoiceId}/record":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - invoices
+      summary: Record invoice
+      description: |
+        Record an invoice.
+
+        **Scope:** `invoices:write`
+      operationId: record-invoice-with-id
+      security:
+        - tokenAuth: []
+        - access_token:
+            - invoices:write
+      responses:
+        "200":
+          description: Invoice recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoice"
+              examples:
+                recoredInvoice:
+                  summary: Invoice recorded successfully
+                  value:
+                    id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
+                    status: published
+                    invoiceNumber: IN-2024-001
+                    customerRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      name: customer 1
+                    currency: SEK
+                    currencyRate: 1
+                    totalAmount: 200
+                    totalTax: 50
+                    paidAmount: 0
+                    creditDate: 2024-10-15
+                    dueDate: 2024-11-15
+                    publishedDateTime: 2024-10-15T12:00:00Z
+                    lineItems:
+                      - id: 1
+                        itemRef:
+                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                          description: Product 1
+                        description: Product 1
+                        itemType: salesItem
+                        productType: goods
+                        quantity: 2
+                        unitPrice: 100
+                        taxRate: 25
+                    billingAddress:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    deliveryAddress:
+                      line1: Delivery Street 15
+                      line2: Floor 2
+                      city: Stockholm
+                      postalCode: 111 11
+                      country: SE
+                    attachmentRefs:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        fileName: myfile.pdf
+                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+                        fileName: myfile2.pdf
+                    journalEntryRef:
+                      id: 89c9566a-9f7a-4894-aedd-4f382006f687
+                    metadata:
+                      project: Website Redesign
+                      department: IT
+                      externalId: EXT-INV-2024-001
+        "400":
+          description: Invalid request or invoice cannot be recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvalidRequest:
+                  value:
+                    code: validation-error
+                    message: Action cannot be performed on invoice with value a419cf69-db6f-4de9-992c-b1a60942a443
+                    bokioErrorId: 4d408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+  "/companies/{companyId}/invoices/{invoiceId}/payments/{paymentId}/record":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+      - name: paymentId
+        in: path
+        required: true
+        description: Unique identifier of the invoice payment
+        schema:
+          type: string
+          format: uuid
+        example: f319cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - invoices
+      summary: Record invoice payment
+      description: |
+        Record an invoice payment.
+
+        **Scope:** `invoices:write`
+      operationId: record-invoice-payment-with-id
+      security:
+        - tokenAuth: []
+        - access_token:
+            - invoices:write
+      responses:
+        "200":
+          description: Invoice payment recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoicePayment"
+              examples:
+                recoredInvoicePayment:
+                  summary: Invoice payment recorded successfully
+                  value:
+                    id: f319cf69-db6f-4de9-992c-b1a60942a443
+                    date: 2024-10-15
+                    sumBaseCurrency: 200
+                    bookkeepingAccountNumber: 1930
+                    journalEntryRef:
+                      id: 089c9566a-9f7a-4894-aedd-4f382006f687
+        "400":
+          description: Invalid request or invoice payment cannot be recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvalidRequest:
+                  value:
+                    code: validation-error
+                    message: Action cannot be performed on invoice payment with value f319cf69-db6f-4de9-992c-b1a60942a443
+                    bokioErrorId: 4d408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Invoice payment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoicePaymentNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice payment with value f319cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+  "/companies/{companyId}/invoices/{invoiceId}/settlements/{settlementId}/record":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+      - name: settlementId
+        in: path
+        required: true
+        description: Unique identifier of the invoice settlement
+        schema:
+          type: string
+          format: uuid
+        example: b329df79-eb7f-5ef0-a8dc-c2b71f953554
+    post:
+      tags:
+        - invoices
+      summary: Record invoice settlement
+      description: |
+        Record an invoice settlement.
+
+        **Scope:** `invoices:write`
+      operationId: record-invoice-settlement-with-id
+      security:
+        - tokenAuth: []
+        - access_token:
+            - invoices:write
+      responses:
+        "200":
+          description: Invoice settlement recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/invoiceSettlement"
+              examples:
+                recoredInvoiceSettlement:
+                  summary: Invoice settlement recorded successfully
+                  value:
+                    id: c529df79-eb7f-5ef0-a8dc-c2b71f953554
+                    invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
+                    type: bankfee
+                    settlementDetails:
+                      date: 2024-10-15
+                      sumBaseCurrency: 15.5
+                    journalEntryRef:
+                      id: 089c9566a-9f7a-4894-aedd-4f382006f687
+        "400":
+          description: Invalid request or invoice settlement cannot be recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvalidRequest:
+                  value:
+                    code: validation-error
+                    message: Action cannot be performed on invoice settlement with value b329df79-eb7f-5ef0-a8dc-c2b71f953554
+                    bokioErrorId: 4d408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Invoice settlement not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoiceSettlementNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice settlement with value b329df79-eb7f-5ef0-a8dc-c2b71f953554 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+  "/companies/{companyId}/credit-notes/{creditNoteId}/record":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: creditNoteId
+        in: path
+        required: true
+        description: Unique identifier of the credit note
+        schema:
+          type: string
+          format: uuid
+        example: b529df79-eb7f-5ef0-a8dc-c2b71f953554
+    post:
+      tags:
+        - credit-notes
+      summary: Record credit note
+      description: |
+        Record a credit note.
+
+        **Scope:** `credit-notes:write`
+      operationId: record-credit-note-with-id
+      security:
+        - tokenAuth: []
+        - access_token:
+            - credit-notes:write
+      responses:
+        "200":
+          description: Credit note recorded successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/creditNote"
+              examples:
+                creditNoteRecorded:
+                  summary: Credit note recorded successfully
+                  value:
+                    id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
+                    status: published
+                    invoiceNumber: CN-2024-001
+                    invoiceRef:
+                      id: a419cf69-db6f-4de9-992c-b1a60942a443
+                      invoiceNumber: IN-2024-001
+                    customerRef:
+                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                      name: customer 1
+                    currency: SEK
+                    currencyRate: 1
+                    totalAmount: 200
+                    totalTax: 50
+                    paidAmount: 0
+                    creditDate: 2024-10-15
+                    dueDate: 2024-11-15
+                    publishedDateTime: 2024-10-15T12:00:00Z
+                    lineItems:
+                      - id: 1
+                        itemRef:
+                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                          description: Product 1
+                        description: Product 1
+                        itemType: salesItem
+                        productType: goods
+                        quantity: 2
+                        unitPrice: 100
+                        taxRate: 25
+                    billingAddress:
+                      line1: Älvsborgsvägen 10
+                      line2: null
+                      city: Göteborg
+                      postalCode: 123 45
+                      country: SE
+                    deliveryAddress:
+                      line1: Delivery Street 15
+                      line2: Floor 2
+                      city: Stockholm
+                      postalCode: 111 11
+                      country: SE
+                    attachmentRefs:
+                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+                        fileName: myfile.pdf
+                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+                        fileName: myfile2.pdf
+                    journalEntryRef:
+                      id: 89c9566a-9f7a-4894-aedd-4f382006f687
+                    metadata:
+                      project: Website Redesign
+                      department: IT
+                      externalId: EXT-INV-2024-001
+        "400":
+          description: Invalid request or invoice payment cannot be recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvalidRequest:
+                  value:
+                    code: validation-error
+                    message: Action cannot be performed on credit note with value b529df79-eb7f-5ef0-a8dc-c2b71f953554
+                    bokioErrorId: 4d408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Credit note not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                CreditNoteNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource credit note with value b529df79-eb7f-5ef0-a8dc-c2b71f953554 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+  "/companies/{companyId}/chart-of-accounts":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    get:
+      tags:
+        - chart-of-accounts
+      summary: Get chart of accounts
+      description: |
+        Retrieves the complete chart of accounts for the company, merging bookkeeping accounts with their associated money account details.
+
+        **Scope:** `chart-of-accounts:read`
+      operationId: get-chart-of-accounts
+      parameters:
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | account              | number      |
+            | name                 | string      |
+            | accountType          | string    |
+          schema:
+            type: string
+          example: account==3950
+      responses:
+        "200":
+          description: Chart of accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/account"
+              examples:
+                Chart of accounts:
+                  value:
+                    - account: 1930
+                      name: Företagskonto / Affärskonto
+                      accountType: basePlanAccount
+                    - account: 3001
+                      name: Försäljning varor, 25% moms
+                      accountType: basePlanAccount
+                    - account: 8001
+                      name: Custom Account
+                      accountType: customAccount
+        "404":
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - tokenAuth: []
+        - access_token:
+            - chart-of-accounts:read
+  "/companies/{companyId}/chart-of-accounts/{account}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: account
+        in: path
+        required: true
+        description: The number of the account
+        schema:
+          type: integer
+          format: int32
+    get:
+      tags:
+        - chart-of-accounts
+      summary: Get specific account
+      description: |
+        Retrieves details of a specific account from the chart of accounts using the account number.
+
+        **Scope:** `chart-of-accounts:read`
+      operationId: get-account-with-number
+      responses:
+        "200":
+          description: Account retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/accountWithDetails"
+              examples:
+                Account:
+                  value:
+                    account: 1930
+                    name: Företagskonto / Affärskonto
+                    accountType: basePlanAccount
+                    accountBalance: 15000.75
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - tokenAuth: []
+        - access_token:
+            - chart-of-accounts:read
 components:
   securitySchemes:
     tokenAuth:
@@ -3399,7 +3909,6 @@ components:
             sie-files:read: Read access to sie files
             sie-files:write: Write access to sie files
             chart-of-accounts:read: Read access to chart of accounts
-            chart-of-accounts:write: Write access to chart of accounts
             credit-notes:read: Read access to credit notes
             credit-notes:write: Write access to credit notes
     client_auth:
@@ -3843,8 +4352,8 @@ components:
             - draft
             - published
             - paid
-            - overpaid
-            - underpaid
+            - overPaid
+            - underPaid
             - overdue
             - credited
             - credit
@@ -3886,6 +4395,14 @@ components:
               name:
                 type: string
                 readOnly: true
+        journalEntryRef:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
         creditNoteRefs:
           type: array
           readOnly: true
@@ -3959,6 +4476,8 @@ components:
             fileName: myfile.pdf
           - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
             fileName: myfile2.pdf
+        journalEntryRef:
+          id: f329df79-eb7f-5ef0-a8dc-c2b71f953554
         metadata:
           project: Website Redesign
           department: IT
@@ -4009,12 +4528,23 @@ components:
           description: The bookkeeping number of the payment account. The value must match a chart of accounts account number that has a payment account details.
           type: integer
           format: int32
+        journalEntryRef:
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
       example:
         id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
         invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
         date: 2024-10-15
         sumBaseCurrency: 200
         bookkeepingAccountNumber: 1930
+        journalEntryRef:
+          id: 55c899c5-82b2-4a09-899e-9dc03342b5dc
     standardSettlementDetails:
       type: object
       required:
@@ -4080,6 +4610,15 @@ components:
               badDebt: "#/components/schemas/standardSettlementDetails"
               balanceAdjustment: "#/components/schemas/standardSettlementDetails"
           description: The settlement details specific to the settlement type
+        journalEntryRef:
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
       example:
         id: c529df79-eb7f-5ef0-a8dc-c2b71f953554
         invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
@@ -4087,6 +4626,8 @@ components:
         invoiceSettlementDetails:
           date: 2024-10-15
           sumBaseCurrency: 15.5
+        journalEntryRef:
+          id: 55c899c5-82b2-4a09-899e-9dc03342b5dc
     creditNote:
       type: object
       required:
@@ -4515,6 +5056,43 @@ components:
         - amount
         - paymentDate
         - recipientRef
+    account:
+      type: object
+      title: account
+      properties:
+        account:
+          type: integer
+          format: int32
+          description: The account number
+        name:
+          type: string
+          description: The account name
+        accountType:
+          type: string
+          enum:
+            - customAccount
+            - basePlanAccount
+          description: The type of account (custom or base plan)
+      example:
+        account: 2610
+        name: Företagskonto / Affärskonto
+        accountType: basePlanAccount
+    accountWithDetails:
+      allOf:
+        - $ref: "#/components/schemas/account"
+        - type: object
+          title: accountWithDetails
+          properties:
+            accountBalance:
+              type: number
+              format: double
+              description: The current balance of the account
+              nullable: true
+          example:
+            account: 1930
+            name: Företagskonto / Affärskonto
+            accountType: basePlanAccount
+            accountBalance: 15000.75
 x-readme:
   explorer-enabled: true
   proxy-enabled: false
