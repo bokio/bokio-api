@@ -3,6 +3,7 @@ info:
   version: "1.0"
   title: Company API
   description: The Bokio Company API containing all resources for company tenant.
+  termsOfService: https://docs.bokio.se/page/terms/
   contact:
     name: Bokio
     url: https://docs.bokio.se
@@ -34,6 +35,8 @@ tags:
     description: Operations for managing credit notes
   - name: chart-of-accounts
     description: Operations for managing chart of accounts
+  - name: company-information
+    description: Operations for managing company information
 externalDocs:
   url: https://docs.bokio.se
   description: Read the API Documentation
@@ -1225,6 +1228,8 @@ paths:
                         fileName: myfile.pdf
                       - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
                         fileName: myfile2.pdf
+                    journalEntryRef:
+                      id: e7f8a972-5a21-411b-aed2-f224d1b6fd68
                     metadata:
                       project: Website Redesign
                       department: IT
@@ -2128,7 +2133,7 @@ paths:
     post:
       tags:
         - invoices
-      summary: Create invoice settlement
+      summary: Create an invoice settlement
       description: |
         Create a settlement for the invoice that will reduce the outstanding amount of the invoice. A negative amount will increase the outstanding amount. For example, in the case of a currency gain.
 
@@ -2147,7 +2152,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/invoiceSettlement"
+              $ref: "#/components/schemas/invoiceSettlementWrite"
             examples:
               New settlement:
                 value:
@@ -2161,7 +2166,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/invoiceSettlement"
+                $ref: "#/components/schemas/invoiceSettlementRead"
               examples:
                 Settlement created:
                   value:
@@ -2240,7 +2245,7 @@ paths:
                       items:
                         type: array
                         items:
-                          $ref: "#/components/schemas/invoiceSettlement"
+                          $ref: "#/components/schemas/invoiceSettlementRead"
         "404":
           description: The requested resource was not found
           content:
@@ -2282,7 +2287,7 @@ paths:
     get:
       tags:
         - invoices
-      summary: Get a invoice settlement
+      summary: Get an invoice settlement
       description: |
         Retrieve the information of the specific settlement with the matching settlementd.
 
@@ -2298,7 +2303,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/invoiceSettlement"
+                $ref: "#/components/schemas/invoiceSettlementRead"
         "404":
           description: The requested resource was not found
           content:
@@ -2319,7 +2324,7 @@ paths:
     delete:
       tags:
         - invoices
-      summary: Delete settlement
+      summary: Delete an invoice settlement
       description: |
         Delete an existing settlement.
 
@@ -3392,7 +3397,7 @@ paths:
     post:
       tags:
         - invoices
-      summary: Record invoice
+      summary: Record an invoice
       description: |
         Record an invoice.
 
@@ -3424,7 +3429,7 @@ paths:
                     totalAmount: 200
                     totalTax: 50
                     paidAmount: 0
-                    creditDate: 2024-10-15
+                    invoiceDate: 2024-10-15
                     dueDate: 2024-11-15
                     publishedDateTime: 2024-10-15T12:00:00Z
                     lineItems:
@@ -3514,7 +3519,7 @@ paths:
     post:
       tags:
         - invoices
-      summary: Record invoice payment
+      summary: Record an invoice payment
       description: |
         Record an invoice payment.
 
@@ -3540,7 +3545,7 @@ paths:
                     sumBaseCurrency: 200
                     bookkeepingAccountNumber: 1930
                     journalEntryRef:
-                      id: 089c9566a-9f7a-4894-aedd-4f382006f687
+                      id: 5471645c-a52a-4859-b642-dbca253419e9
         "400":
           description: Invalid request or invoice payment cannot be recorded
           content:
@@ -3594,7 +3599,7 @@ paths:
     post:
       tags:
         - invoices
-      summary: Record invoice settlement
+      summary: Record an invoice settlement
       description: |
         Record an invoice settlement.
 
@@ -3610,19 +3615,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/invoiceSettlement"
+                $ref: "#/components/schemas/invoiceSettlementRead"
               examples:
                 recoredInvoiceSettlement:
                   summary: Invoice settlement recorded successfully
                   value:
                     id: c529df79-eb7f-5ef0-a8dc-c2b71f953554
                     invoiceId: a419cf69-db6f-4de9-992c-b1a60942a443
-                    type: bankfee
+                    type: bankFee
                     settlementDetails:
                       date: 2024-10-15
                       sumBaseCurrency: 15.5
                     journalEntryRef:
-                      id: 089c9566a-9f7a-4894-aedd-4f382006f687
+                      id: 1c605758-32f5-4594-8afd-f56816d95cde
         "400":
           description: Invalid request or invoice settlement cannot be recorded
           content:
@@ -3879,6 +3884,47 @@ paths:
         - tokenAuth: []
         - access_token:
             - chart-of-accounts:read
+  "/companies/{companyId}/company-information":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+    get:
+      tags:
+        - company-information
+      summary: Retrieve company information
+      description: |
+        Retrieve the information of the company.
+
+        **Scope:** `company-information:read`
+      operationId: get-company-information-with-id
+      responses:
+        "200":
+          description: Company information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  companyInformation:
+                    $ref: "#/components/schemas/companyInformation"
+        "404":
+          description: Company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
 components:
   securitySchemes:
     tokenAuth:
@@ -3911,6 +3957,7 @@ components:
             chart-of-accounts:read: Read access to chart of accounts
             credit-notes:read: Read access to credit notes
             credit-notes:write: Write access to credit notes
+            company-information:read: Read access to company information
     client_auth:
       type: http
       scheme: basic
@@ -4397,6 +4444,7 @@ components:
                 readOnly: true
         journalEntryRef:
           type: object
+          readOnly: true
           nullable: true
           properties:
             id:
@@ -4562,11 +4610,9 @@ components:
       example:
         date: 2024-10-15
         sumBaseCurrency: 15.5
-    invoiceSettlement:
+    invoiceSettlementRead:
       type: object
-      required:
-        - type
-        - invoiceSettlementDetails
+      readOnly: true
       properties:
         id:
           type: string
@@ -4580,6 +4626,7 @@ components:
           readOnly: true
         type:
           type: string
+          readOnly: true
           enum:
             - currency
             - bankFee
@@ -4595,10 +4642,6 @@ components:
             - Bad debts are for uncollectible invoices.
 
             - Balance adjustments are for correcting discrepancies on invoices without affecting bookkeeping.
-
-            > 📘 Settlement types that can be created in Bokio API
-            > - `currency`
-            > - `bankFee`
         invoiceSettlementDetails:
           oneOf:
             - $ref: "#/components/schemas/standardSettlementDetails"
@@ -4628,6 +4671,37 @@ components:
           sumBaseCurrency: 15.5
         journalEntryRef:
           id: 55c899c5-82b2-4a09-899e-9dc03342b5dc
+    invoiceSettlementWrite:
+      type: object
+      required:
+        - type
+        - invoiceSettlementDetails
+      properties:
+        type:
+          type: string
+          enum:
+            - currency
+            - bankFee
+          description: |
+            The type of the settlement.
+
+            - Currency adjustments are for changes in exchange rates. Currency gain or currency loss is reflected in `sumBaseCurrency` being positive or negative respectively.
+
+            - Bank fees are for charges from banks or payment providers.
+        invoiceSettlementDetails:
+          oneOf:
+            - $ref: "#/components/schemas/standardSettlementDetails"
+          discriminator:
+            propertyName: reason
+            mapping:
+              currency: "#/components/schemas/standardSettlementDetails"
+              bankFee: "#/components/schemas/standardSettlementDetails"
+          description: The settlement details specific to the settlement type
+      example:
+        type: bankFee
+        invoiceSettlementDetails:
+          date: 2024-10-15
+          sumBaseCurrency: 15.5
     creditNote:
       type: object
       required:
@@ -4739,6 +4813,15 @@ components:
               name:
                 type: string
                 readOnly: true
+        journalEntryRef:
+          type: object
+          readOnly: true
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
         metadata:
           type: object
           nullable: true
@@ -4797,6 +4880,8 @@ components:
             fileName: myfile.pdf
           - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
             fileName: myfile2.pdf
+        journalEntryRef:
+          id: 340a4af0-edfd-47b1-b4ab-f30450eaac19
         metadata:
           project: Website Redesign
           department: IT
@@ -5093,6 +5178,51 @@ components:
             name: Företagskonto / Affärskonto
             accountType: basePlanAccount
             accountBalance: 15000.75
+    companyInformation:
+      title: companyInformation
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the company
+        companyType:
+          type: string
+          enum:
+            - proprietorship
+            - limitedCompany
+            - limitedPartnership
+            - partnership
+            - cooperative
+            - notSet
+          description: Company type of the company
+        name:
+          type: string
+          description: Name of the company
+        orgNumber:
+          type: string
+          description: Organization number of the company
+        phone:
+          type: string
+          description: Phone number of the contact person
+        email:
+          type: string
+          description: Email address of the contact person
+        address:
+          $ref: "#/components/schemas/address"
+      example:
+        id: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        companyType: limitedCompany
+        name: Company AB
+        orgNumber: 556677-8899
+        phone: "+46123456789"
+        email: info@example.com
+        address:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
 x-readme:
   explorer-enabled: true
   proxy-enabled: false

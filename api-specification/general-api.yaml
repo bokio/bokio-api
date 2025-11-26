@@ -3,6 +3,7 @@ info:
   version: "1.0"
   title: General API
   description: Bokio General API
+  termsOfService: https://docs.bokio.se/page/terms/
   contact:
     name: Bokio
     url: https://docs.bokio.se
@@ -191,12 +192,6 @@ paths:
       description: Retrieve a list of connections for the authenticated client
       operationId: get-connections
       parameters:
-        - name: Content-Type
-          description: The scope for the authorization request
-          in: header
-          schema:
-            type: string
-            default: application/json
         - name: page
           description: Page number (starting from 1)
           in: query
@@ -235,6 +230,69 @@ paths:
                         type: array
                         items:
                           $ref: "#/components/schemas/connection"
+      security:
+        - tokenAuth: []
+        - access_token: []
+  "/connections/{connectionId}":
+    get:
+      tags:
+        - connections
+      summary: Get connection by ID
+      description: Retrieve a specific connection by its ID
+      operationId: get-connection-by-id
+      parameters:
+        - name: connectionId
+          description: The unique identifier of the connection
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Connection found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/connection"
+        "404":
+          description: Connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - tokenAuth: []
+        - access_token: []
+    delete:
+      tags:
+        - connections
+      summary: Delete connection by ID
+      description: Delete a specific connection and its associated data (PublicApiConnection, CompanyMembership, PublicApiRefreshToken)
+      operationId: delete-connection-by-id
+      parameters:
+        - name: connectionId
+          description: The unique identifier of the connection
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Connection deleted successfully
+        "403":
+          description: Forbidden - not allowed to delete this connection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "404":
+          description: Connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
       security:
         - tokenAuth: []
         - access_token: []
@@ -317,6 +375,26 @@ components:
           enum:
             - company
           description: The type of connection (e.g., company)
+    apiError:
+      type: object
+      title: apiError
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        bokioErrorId:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
 x-readme:
   explorer-enabled: true
   proxy-enabled: true
