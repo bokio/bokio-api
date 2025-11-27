@@ -268,7 +268,7 @@ paths:
       tags:
         - connections
       summary: Delete connection by ID
-      description: Delete a specific connection and its associated data (PublicApiConnection, CompanyMembership, PublicApiRefreshToken)
+      description: Delete a specific connection and its associated data
       operationId: delete-connection-by-id
       parameters:
         - name: connectionId
