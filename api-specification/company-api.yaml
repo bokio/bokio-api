@@ -3211,7 +3211,7 @@ paths:
                 Payment created:
                   value:
                     id: 835ba700-b306-4bd9-8447-59207b6b0002
-                    status: awaitingApproval
+                    status: readyToSign
                     amount: 1200
                     createdDateTime: 2025-08-25T08:15:00Z
                     paymentDate: 2025-08-25
@@ -3351,7 +3351,7 @@ paths:
                 bank payment found:
                   value:
                     id: 835ba700-b306-4bd9-8447-59207b6b0002
-                    status: awaitingApproval
+                    status: readyToSign
                     createdDateTime: 2025-08-25T08:15:00Z
                     amount: 1500
                     paymentDate: 2025-08-25
@@ -5085,17 +5085,12 @@ components:
         status:
           type: string
           enum:
-            - invalid
-            - awaitingApproval
-            - cancelledByUser
-            - draftInExternalSystem
-            - waitingForAuthorization
-            - inComplianceReview
+            - readyToSign
+            - onTheWay
             - scheduled
-            - transfering
-            - rejectedByBank
-            - paymentComplete
-            - waitingForStatus
+            - paid
+            - rejected
+            - cancelled error
           description: Current status of the payment
           readOnly: true
         createdDateTime:
@@ -5126,7 +5121,7 @@ components:
             - $ref: "#/components/schemas/transferRecipient"
       example:
         id: 835ba700-b306-4bd9-8447-59207b6b0002
-        status: awaitingApproval
+        status: readyToSign
         createdDateTime: 2023-10-01T08:15:00Z
         amount: 1000
         paymentDate: 2023-10-01
