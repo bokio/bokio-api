@@ -5090,7 +5090,8 @@ components:
             - scheduled
             - paid
             - rejected
-            - cancelled error
+            - cancelled
+            - error
           description: Current status of the payment
           readOnly: true
         createdDateTime:
