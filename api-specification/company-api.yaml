@@ -684,6 +684,7 @@ paths:
                       postalCode: 123 45
                       country: SE
                     language: sv
+                    modifiedDateTime: 2024-10-10T00:00:00Z
         "400":
           description: Missing required information
           content:
@@ -743,6 +744,7 @@ paths:
             | type                 | string      |
             | vatNumber            | string      |
             | orgNumber            | string      |
+            | modifiedDateTime     | date-time   |
           schema:
             type: string
           example: name==customer 1
@@ -818,6 +820,7 @@ paths:
                       postalCode: 123 45
                       country: SE
                     language: sv
+                    modifiedDateTime: 2024-10-10T00:00:00Z
         "404":
           description: Customer not found
           content:
@@ -898,6 +901,7 @@ paths:
                       postalCode: 123 45
                       country: SE
                     language: sv
+                    modifiedDateTime: 2024-10-10T00:00:00Z
         "400":
           description: Missing required information
           content:
@@ -4174,6 +4178,12 @@ components:
           enum:
             - sv
             - en
+        modifiedDateTime:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          description: The date and time the customer was last modified. Returns null for customers that were changed before this field was introduced.
       example:
         id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
         name: customer 1
@@ -4193,6 +4203,7 @@ components:
           postalCode: 123 45
           country: SE
         language: sv
+        modifiedDateTime: 2024-10-10T00:00:00Z
     salesInvoiceItem:
       type: object
       title: salesItem
