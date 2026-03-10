@@ -971,6 +971,8 @@ paths:
                   customerRef:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
+                  contactDetailRef:
+                    id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                   invoiceNumber: "1234"
                   orderNumberReference: ORD-5678
                   currency: SEK
@@ -1017,6 +1019,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     invoiceNumber: "1234"
                     orderNumberReference: ORD-5678
                     currency: SEK
@@ -1191,6 +1197,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     invoiceNumber: "1234"
                     orderNumberReference: ORD-5678
                     currency: SEK
@@ -1282,6 +1292,8 @@ paths:
                   customerRef:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
+                  contactDetailRef:
+                    id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                   invoiceNumber: "1234"
                   orderNumberReference: ORD-5678
                   currency: SEK
@@ -1330,6 +1342,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     status: draft
                     invoiceNumber: "1234"
                     orderNumberReference: ORD-5678
@@ -1890,6 +1906,7 @@ paths:
       summary: Publish an invoice
       description: |
         Publishes a draft invoice, making it official and ready to be sent to the customer.
+        Note that invoice will not be automatically emailed to the customer when published through the API.
 
         **Scope:** `invoices:write`
       operationId: post-invoices-invoiceId-publish
@@ -2408,6 +2425,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -3172,7 +3193,9 @@ paths:
         - bank-payments
       summary: Create a bank payment
       description: |
-        Creates a new bank payment for the company.
+        Creates a new bank payment for the company. Payment will be created in the Bokio system.
+        In order to submit the transaction to the bank, the signatory for the account needs to login to the Bokio application and sign the payment with their BankID.
+        This is different from the transactions imported through a connected bank in Bokio.
 
         **Scope:** `bank-payments:write`
       operationId: post-bank-payment
@@ -3428,6 +3451,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -3707,6 +3734,10 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                    contactDetailRef:
+                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+                      email: contact@customer1.com
+                      phone: "+46701234567"
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -4096,9 +4127,9 @@ components:
         description: example.png
         contentType: img/png
         journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
-    address:
+    addressWithCountrySubdivision:
       type: object
-      title: address
+      title: addressWithCountrySubdivision
       required:
         - line1
         - city
@@ -4118,12 +4149,17 @@ components:
           description: ISO 3166-1 alpha-2 country code
           type: string
           format: country
+        countrySubdivision:
+          description: ISO 3166-2 subdivision code (e.g. ENG, SCT, WLS, NIR for GB). Currently required for GB (United kingdom) country.
+          type: string
+          nullable: true
       example:
-        line1: Älvsborgsvägen 10
+        line1: 10 Downing Street
         line2: null
-        city: Göteborg
-        postalCode: 123 45
-        country: SE
+        city: London
+        postalCode: SW1A 2AA
+        country: GB
+        countrySubdivision: ENG
     customer:
       type: object
       title: customer
@@ -4171,7 +4207,7 @@ components:
               isDefault:
                 type: boolean
         address:
-          $ref: "#/components/schemas/address"
+          $ref: "#/components/schemas/addressWithCountrySubdivision"
         language:
           type: string
           description: Default 'sv'
@@ -4348,6 +4384,29 @@ components:
       oneOf:
         - $ref: "#/components/schemas/salesInvoiceItem"
         - $ref: "#/components/schemas/descriptionOnlyInvoiceItem"
+    address:
+      type: object
+      title: address
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          description: ISO 3166-1 alpha-2 country code
+          type: string
+          format: country
+      example:
+        line1: Delivery Street 15
+        line2: Floor 2
+        city: Stockholm
+        postalCode: 123 45
+        country: SE
     invoice:
       type: object
       title: invoice
@@ -4376,6 +4435,22 @@ components:
             name:
               type: string
               readOnly: true
+        contactDetailRef:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              nullable: true
+            email:
+              type: string
+              readOnly: true
+              nullable: true
+            phone:
+              type: string
+              readOnly: true
+              nullable: true
         invoiceNumber:
           type: string
           readOnly: true
@@ -4436,7 +4511,7 @@ components:
         billingAddress:
           readOnly: true
           oneOf:
-            - $ref: "#/components/schemas/address"
+            - $ref: "#/components/schemas/addressWithCountrySubdivision"
         deliveryAddress:
           oneOf:
             - $ref: "#/components/schemas/address"
@@ -4490,6 +4565,10 @@ components:
         customerRef:
           id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
           name: customer 1
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
         invoiceNumber: "1234"
         orderNumberReference: ORD-5678
         currency: SEK
@@ -4750,6 +4829,24 @@ components:
             name:
               type: string
               readOnly: true
+        contactDetailRef:
+          type: object
+          nullable: true
+          readOnly: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              nullable: true
+            email:
+              type: string
+              readOnly: true
+              nullable: true
+            phone:
+              type: string
+              readOnly: true
+              nullable: true
         invoiceNumber:
           type: string
           readOnly: true
@@ -4806,7 +4903,7 @@ components:
         billingAddress:
           readOnly: true
           oneOf:
-            - $ref: "#/components/schemas/address"
+            - $ref: "#/components/schemas/addressWithCountrySubdivision"
         deliveryAddress:
           oneOf:
             - $ref: "#/components/schemas/address"
@@ -4855,6 +4952,10 @@ components:
         customerRef:
           id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
           name: customer 1
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
         currency: SEK
         currencyRate: 1
         totalAmount: 200
@@ -5206,7 +5307,7 @@ components:
         name:
           type: string
           description: Name of the company
-        orgNumber:
+        organizationNumber:
           type: string
           description: Organization number of the company
         phone:
@@ -5215,15 +5316,20 @@ components:
         email:
           type: string
           description: Email address of the contact person
+        hasBBA:
+          type: boolean
+          description: Indicates whether the company has a business bank account
         address:
-          $ref: "#/components/schemas/address"
+          oneOf:
+            - $ref: "#/components/schemas/address"
       example:
         id: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
         companyType: limitedCompany
         name: Company AB
-        orgNumber: 556677-8899
+        organizationNumber: 556677-8899
         phone: "+46123456789"
         email: info@example.com
+        hasBBA: true
         address:
           line1: Älvsborgsvägen 10
           line2: null

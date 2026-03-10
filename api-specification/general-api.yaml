@@ -269,7 +269,7 @@ paths:
       tags:
         - connections
       summary: Delete connection by ID
-      description: Delete a specific connection and its associated data
+      description: Delete a specific connection and its associated data. Associated data refers to tokens and company permissions that were allowed. However, it will not delete any data created through the integration.
       operationId: delete-connection-by-id
       parameters:
         - name: connectionId
