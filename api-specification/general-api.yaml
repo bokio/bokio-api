@@ -311,10 +311,7 @@ components:
         authorizationCode:
           authorizationUrl: /authorize
           tokenUrl: /token
-          scopes:
-            invoices: Read and write access to invoices, customers and items
-            accounting: Read and write access to journal entries
-            uploads: Read and write access to uploads
+          scopes: {}
     client_auth:
       type: http
       scheme: basic

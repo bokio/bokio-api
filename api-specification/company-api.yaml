@@ -2485,6 +2485,64 @@ paths:
         - tokenAuth: []
         - access_token:
             - invoices:write
+  "/companies/{companyId}/invoices/{invoiceId}/delete":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: invoiceId
+        in: path
+        required: true
+        description: Unique identifier of the invoice
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    delete:
+      tags:
+        - invoices
+      summary: Delete an invoice
+      description: |
+        Deletes the specified invoice. Only invoices in draft status can be deleted.
+
+        **Scope:** `invoices:write`
+      operationId: delete-invoice-with-id
+      security:
+        - tokenAuth: []
+        - access_token:
+            - invoices:write
+      responses:
+        "204":
+          description: Invoice deleted successfully
+        "400":
+          description: Invalid request or invoice cannot be deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvalidRequest:
+                  value:
+                    code: operation-not-allowed
+                    message: Invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 cannot be deleted as it is not in draft status
+                    bokioErrorId: 4d408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Invoice not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                InvoiceNotFound:
+                  value:
+                    code: not-found
+                    message: The requested resource invoice with value a419cf69-db6f-4de9-992c-b1a60942a443 was not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
   "/companies/{companyId}/credit-notes":
     parameters:
       - name: companyId
@@ -3403,6 +3461,118 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
+  "/companies/{companyId}/bank-payments/bulk":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - bank-payments
+      summary: Bulk create bank payments
+      description: |
+        Creates multiple bank payments for the company in a single request. Up to 100 payments can be created per request.
+
+        The operation is atomic — if any payment fails validation, no payments are created.
+
+        **Scope:** `bank-payments:write`
+      operationId: post-bank-payments-bulk
+      requestBody:
+        description: List of bank payments to create.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/bulk-create-bank-payments-request"
+            examples:
+              Two payments:
+                value:
+                  payments:
+                    - amount: 1200
+                      paymentDate: 2025-08-25
+                      ownNote: Rent payment
+                      recipientRef:
+                        kind: transfer
+                        recipientName: Property Management Co
+                        recipientReference: RENT-2025-08
+                        clearingNumber: "5011"
+                        accountNumber: "0379101"
+                    - amount: 2500.5
+                      paymentDate: 2025-08-25
+                      ownNote: Service payment
+                      recipientRef:
+                        kind: bankgiro
+                        recipientName: Tech Solutions Ltd
+                        bankgiroNumber: 123-4567
+                        ocr: "123456789012345"
+      responses:
+        "200":
+          description: All payments created successfully.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/bank-payment"
+              examples:
+                All succeeded:
+                  value:
+                    - id: 835ba700-b306-4bd9-8447-59207b6b0002
+                      status: readyToSign
+                      amount: 1200
+                      createdDateTime: 2025-08-25T08:15:00Z
+                      paymentDate: 2025-08-25
+                      ownNote: Rent payment
+                      recipientRef:
+                        kind: transfer
+                        recipientName: Property Management Co
+                        recipientReference: RENT-2025-08
+                        clearingNumber: "5011"
+                        accountNumber: "0379101"
+                    - id: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                      status: readyToSign
+                      amount: 2500.5
+                      createdDateTime: 2025-08-25T08:15:00Z
+                      paymentDate: 2025-08-25
+                      ownNote: Service payment
+                      recipientRef:
+                        kind: bankgiro
+                        recipientName: Tech Solutions Ltd
+                        bankgiroNumber: 123-4567
+                        ocr: "123456789012345"
+        "400":
+          description: |
+            Validation failed. No payments were created.
+            Errors include the payment index in the field path.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Payment validation errors:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 2 errors
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/payments/0/recipientRef/bankgiroNumber"
+                        message: The bankgiro number is invalid
+                      - field: "#/payments/1/amount"
+                        message: The amount must be greater than 0
+                Too many payments:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 1 error
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/payments"
+                        message: The number of payments must not exceed 100
+      security:
+        - tokenAuth: []
   "/companies/{companyId}/invoices/{invoiceId}/record":
     parameters:
       - name: companyId
@@ -3987,6 +4157,9 @@ components:
             uploads:write: Write access to uploads
             fiscal-years:read: Read access to fiscal years
             fiscal-years:write: Write access to fiscal years
+            bank-payments:read-limited: Limited read access to bank payments
+            bank-payments:write: Write access to bank payments
+            sie:read: Read access to sie files
             sie-files:read: Read access to sie files
             sie-files:write: Write access to sie files
             chart-of-accounts:read: Read access to chart of accounts
@@ -5149,19 +5322,14 @@ components:
           description: Bankgiro number (required for Bankgiro payments)
         ocr:
           type: string
-          description: OCR reference for the payment
+          description: OCR reference for the payment. Either `ocr` or `message` must be provided, but not both.
         message:
           type: string
-          description: Message for the payment
+          description: Message for the payment. Either `message` or `ocr` must be provided, but not both.
       required:
         - kind
         - recipientName
         - bankgiroNumber
-      oneOf:
-        - required:
-            - ocr
-        - required:
-            - message
     transferRecipient:
       type: object
       properties:
@@ -5249,6 +5417,18 @@ components:
         - amount
         - paymentDate
         - recipientRef
+    bulk-create-bank-payments-request:
+      type: object
+      properties:
+        payments:
+          type: array
+          minItems: 1
+          maxItems: 100
+          description: List of bank payments to create (1-100 items)
+          items:
+            $ref: "#/components/schemas/bank-payment"
+      required:
+        - payments
     account:
       type: object
       title: account
@@ -5302,6 +5482,9 @@ components:
             - limitedPartnership
             - partnership
             - cooperative
+            - nonProfitAssociation
+            - communityAssociation
+            - religiousCommunity
             - notSet
           description: Company type of the company
         name:
