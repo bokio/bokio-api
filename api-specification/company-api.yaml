@@ -35,6 +35,8 @@ tags:
     description: Operations for managing accounting journal entries
   - name: sie-files
     description: Operations for managing SIE files
+  - name: suppliers
+    description: Operations for managing suppliers
   - name: tag-groups
     description: Operations for managing tag groups and tags
   - name: uploads
@@ -585,6 +587,9 @@ paths:
             | type                 | string      |
             | customerRef          | string      |
             | orderNumberReference | string      |
+            | projectReference     | string      |
+            | buyerReference       | string      |
+            | contractReference    | string      |
             | currency             | string      |
             | totalAmount          | number      |
             | status               | string      |
@@ -684,6 +689,9 @@ paths:
                 value:
                   id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
                   orderNumberReference: ORD-5678
+                  projectReference: PROJ-001
+                  buyerReference: BUYER-123
+                  contractReference: CONTRACT-456
                   currency: SEK
                   currencyRate: 1
                   creditDate: 2024-10-15
@@ -890,6 +898,9 @@ paths:
                     creditDate: 2024-10-15
                     dueDate: 2024-11-15
                     publishedDateTime: 2024-10-15T12:00:00Z
+                    projectReference: PROJ-001
+                    buyerReference: BUYER-123
+                    contractReference: CONTRACT-456
                     lineItems:
                       - id: 1
                         itemRef:
@@ -1499,6 +1510,9 @@ paths:
                     id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                   invoiceNumber: "1234"
                   orderNumberReference: ORD-5678
+                  projectReference: PROJ-001
+                  buyerReference: BUYER-123
+                  contractReference: CONTRACT-456
                   currency: SEK
                   currencyRate: 1
                   totalAmount: 200
@@ -1550,6 +1564,9 @@ paths:
                     invoiceNumber: "1234"
                     paymentReference: null
                     orderNumberReference: ORD-5678
+                    projectReference: PROJ-001
+                    buyerReference: BUYER-123
+                    contractReference: CONTRACT-456
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -1653,6 +1670,9 @@ paths:
             | type                 | string      |
             | customerRef          | string      |
             | orderNumberReference | string      |
+            | projectReference     | string      |
+            | buyerReference       | string      |
+            | contractReference    | string      |
             | currency             | string      |
             | totalAmount          | number      |
             | status               | string      |
@@ -1729,6 +1749,9 @@ paths:
                     invoiceNumber: "1234"
                     paymentReference: null
                     orderNumberReference: ORD-5678
+                    projectReference: PROJ-001
+                    buyerReference: BUYER-123
+                    contractReference: CONTRACT-456
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -1822,6 +1845,9 @@ paths:
                     id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                   invoiceNumber: "1234"
                   orderNumberReference: ORD-5678
+                  projectReference: PROJ-001
+                  buyerReference: BUYER-123
+                  contractReference: CONTRACT-456
                   currency: SEK
                   currencyRate: 1
                   totalAmount: 200
@@ -1876,6 +1902,9 @@ paths:
                     invoiceNumber: "1234"
                     paymentReference: null
                     orderNumberReference: ORD-5678
+                    projectReference: PROJ-001
+                    buyerReference: BUYER-123
+                    contractReference: CONTRACT-456
                     currency: SEK
                     currencyRate: 1
                     totalAmount: 200
@@ -3105,6 +3134,7 @@ paths:
         > 📘 Settlement types that can be created in Bokio API
         > - `currency`
         > - `bankFee`
+        > - `paymentServiceFee`
 
         **Scope:** `invoices:write`
       operationId: post-invoice-settlement
@@ -3125,6 +3155,13 @@ paths:
                   invoiceSettlementDetails:
                     date: 2024-10-15
                     sumBaseCurrency: 100
+              Payment service fee settlement:
+                value:
+                  type: paymentServiceFee
+                  invoiceSettlementDetails:
+                    date: 2024-10-15
+                    sumBaseCurrency: 25
+                    vatScheme: eu
       responses:
         "200":
           description: Settlement created successfully
@@ -3436,6 +3473,7 @@ paths:
                   unitType: piece
                   unitPrice: 100
                   taxRate: 25
+                  bookkeepingAccountNumber: 3920
       responses:
         "200":
           description: Item created
@@ -3454,6 +3492,7 @@ paths:
                     unitType: piece
                     unitPrice: 100
                     taxRate: 25
+                    bookkeepingAccountNumber: 3920
         "400":
           description: Missing Required Information
           content:
@@ -3581,6 +3620,7 @@ paths:
                     unitType: piece
                     unitPrice: 100
                     taxRate: 25
+                    bookkeepingAccountNumber: 3920
         "404":
           description: Item Not Found
           content:
@@ -3621,6 +3661,7 @@ paths:
                   unitType: piece
                   unitPrice: 100
                   taxRate: 25
+                  bookkeepingAccountNumber: 3920
       responses:
         "200":
           description: Item updated
@@ -3639,6 +3680,7 @@ paths:
                     unitType: piece
                     unitPrice: 100
                     taxRate: 25
+                    bookkeepingAccountNumber: 3920
         "400":
           description: Missing required information
           content:
@@ -3718,6 +3760,23 @@ paths:
                     - debit: 0
                       credit: 160
                       account: 2611
+              New journal with verification-level tags:
+                value:
+                  title: invoice 1234
+                  date: 2024-10-10
+                  items:
+                    - debit: 200
+                      credit: 0
+                      account: 1930
+                    - debit: 0
+                      credit: 40
+                      account: 3011
+                    - debit: 0
+                      credit: 160
+                      account: 2611
+                  tags:
+                    - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      weight: 1
       responses:
         "200":
           description: Journal entry created
@@ -3737,14 +3796,46 @@ paths:
                         debit: 200
                         credit: 0
                         account: 1930
+                        tags: []
                       - id: 2
                         debit: 0
                         credit: 40
                         account: 3011
+                        tags: []
                       - id: 3
                         debit: 0
                         credit: 160
                         account: 2611
+                        tags: []
+                    tags: []
+                Journal entry created with tags:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                        tags: []
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                        tags: []
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+                        tags: []
+                    tags:
+                      - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                        tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        tagName: Project Alpha
+                        tagGroupName: Project
+                        weight: 1
         "400":
           description: Missing required information
           content:
@@ -3806,6 +3897,16 @@ paths:
           schema:
             type: string
           example: title~invoice 1234
+        - name: tagId
+          in: query
+          required: false
+          description: |
+            [Preview] Filter journal entries by tag. Returns only journal entries that have the specified tag applied, either at the journal entry level or at the line item level.
+
+            Requires the Tags feature to be enabled in the company's price plan.
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: Journal entries found
@@ -3857,7 +3958,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/journalEntry"
               examples:
-                Update journal:
+                Journal entry:
                   value:
                     id: a419cf69-db6f-4de9-992c-b1a60942a443
                     title: invoice 1234
@@ -3868,14 +3969,18 @@ paths:
                         debit: 200
                         credit: 0
                         account: 1930
+                        tags: []
                       - id: 2
                         debit: 0
                         credit: 40
                         account: 3011
+                        tags: []
                       - id: 3
                         debit: 0
                         credit: 160
                         account: 2611
+                        tags: []
+                    tags: []
         "404":
           description: Journal entry not found
           content:
@@ -3946,14 +4051,18 @@ paths:
                         debit: 0
                         credit: 200
                         account: 1930
+                        tags: []
                       - id: 2
                         debit: 40
                         credit: 0
                         account: 3011
+                        tags: []
                       - id: 3
                         debit: 160
                         credit: 0
                         account: 2611
+                        tags: []
+                    tags: []
                     reversingJournalEntryId: a419cf69-db6f-4de9-992c-b1a60942a443
         "400":
           description: Not allowed to reverse journal entry
@@ -3969,6 +4078,195 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
         "404":
           description: journal entry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: journal entry not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/journal-entries/{journalEntryId}/tags":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: journalEntryId
+        in: path
+        required: true
+        description: Unique identifier of the journal entry
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    put:
+      tags:
+        - journal-entries
+      summary: "[Preview] Update journal entry tags"
+      description: |
+        Replaces all tags on a journal entry with the provided tags.
+
+        Either set verification-level tags (using `tags`) or transaction-level tags (using `items[*].tags`), not both on the same journal entry.
+
+        The company must have the Tags feature enabled in their price plan.
+
+        **Preview:** This endpoint is in preview and may change or be removed before general availability.
+        [Read the full preview policy](/reference/versioning#preview)
+
+        **Scope:** `journal-entries:write`
+      operationId: put-journalentry-tags
+      requestBody:
+        description: The tags to apply to the journal entry (replaces all existing tags).
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/journalEntryTags"
+            examples:
+              Verification-level tags:
+                value:
+                  tags:
+                    - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                      weight: 0.6
+                    - tagId: c3d4e5f6-a7b8-9012-cdef-123456789012
+                      weight: 0.4
+                  items: []
+              Transaction-level tags:
+                value:
+                  tags: []
+                  items:
+                    - id: 1
+                      tags:
+                        - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                          weight: 1
+                    - id: 2
+                      tags:
+                        - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                          weight: 1
+              Remove all tags:
+                value:
+                  tags: []
+                  items: []
+      responses:
+        "200":
+          description: Tags updated, returns the updated journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/journalEntry"
+              examples:
+                Verification-level tags applied:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                        tags: []
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                        tags: []
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+                        tags: []
+                    tags:
+                      - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                        tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        tagName: Project Alpha
+                        tagGroupName: Project
+                        weight: 0.6
+                      - tagId: c3d4e5f6-a7b8-9012-cdef-123456789012
+                        tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                        tagName: Project Beta
+                        tagGroupName: Project
+                        weight: 0.4
+                Transaction-level tags applied:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                        tags:
+                          - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                            tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                            tagName: Project Alpha
+                            tagGroupName: Project
+                            weight: 1
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                        tags:
+                          - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+                            tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+                            tagName: Project Alpha
+                            tagGroupName: Project
+                            weight: 1
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+                        tags: []
+                    tags: []
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Mutual exclusion violation:
+                  value:
+                    code: validation-error
+                    message: The tags field must be applied at either the verification level or the transaction level, not both
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "403":
+          description: |
+            Forbidden. The company's price plan does not include the Tags feature, or the integration does not have the required scope.
+
+            See [price plan requirements](price-plan-requirements#handling-403-responses) for details on how to handle this response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Price plan restriction:
+                  value:
+                    error: price_plan_feature_required
+                    message: This feature requires the Tags add-on
+                    details:
+                      requiredFeature: Tags
+                      availableIn:
+                        - Plus
+                        - Business
+                      availableAsAddonIn:
+                        - Premium
+                      isAvailableInTrial: true
+                      isInTrial: false
+        "404":
+          description: Journal entry not found
           content:
             application/json:
               schema:
@@ -4462,6 +4760,328 @@ paths:
                   value:
                     code: not-found
                     message: Tag group not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/suppliers":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+    post:
+      tags:
+        - suppliers
+      summary: "[Preview] Create a supplier"
+      description: |
+        Creates a new supplier for the company.
+
+        **Scope:** `suppliers:write`
+      operationId: post-supplier
+      requestBody:
+        description: Post the necessary fields for the API to create a supplier.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supplier"
+            examples:
+              New supplier:
+                value:
+                  name: Supplier ABC
+                  orgNumber: 556677-8899
+                  vatNumber: SE123456789001
+                  address:
+                    line1: Älvsborgsvägen 10
+                    line2: c/o Test
+                    city: Gothenburg
+                    postalCode: 123 45
+                    country: SE
+                  paymentDetails:
+                    type: bankgiro
+                    bankgiroNumber: 1234-5678
+      responses:
+        "200":
+          description: Supplier created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supplier"
+              examples:
+                Supplier created:
+                  value:
+                    id: 12345678-abcd-1234-abcd-1234567890ab
+                    name: Supplier ABC
+                    orgNumber: 556677-8899
+                    vatNumber: SE123456789001
+                    currency: SEK
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: c/o Test
+                      city: Gothenburg
+                      postalCode: 123 45
+                      country: SE
+                    paymentDetails:
+                      type: bankgiro
+                      bankgiroNumber: 1234-5678
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 1 error
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/name"
+                        message: The name field is required
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - suppliers
+      summary: "[Preview] Get suppliers"
+      description: |
+        Get all suppliers for the company. Use the query parameters to filter and navigate through the results.
+
+        **Scope:** `suppliers:read`
+      operationId: get-suppliers
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | name                 | string      |
+            | vatNumber            | string      |
+            | orgNumber            | string      |
+          schema:
+            type: string
+          example: name==Supplier ABC
+      responses:
+        "200":
+          description: Suppliers found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/supplier"
+      security:
+        - tokenAuth: []
+  "/companies/{companyId}/suppliers/{supplierId}":
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: supplierId
+        in: path
+        required: true
+        description: Unique identifier of the supplier
+        schema:
+          type: string
+          format: uuid
+        example: 12345678-abcd-1234-abcd-1234567890ab
+    get:
+      tags:
+        - suppliers
+      summary: "[Preview] Get a supplier"
+      description: |
+        Retrieve the information of the supplier with the matching supplierId.
+
+        **Scope:** `suppliers:read`
+      operationId: get-supplier-by-id
+      responses:
+        "200":
+          description: Supplier found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supplier"
+              examples:
+                Supplier found:
+                  value:
+                    id: 12345678-abcd-1234-abcd-1234567890ab
+                    name: Example Supplier
+                    orgNumber: 556677-8899
+                    vatNumber: SE123456789001
+                    currency: SEK
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: c/o Test
+                      city: Gothenburg
+                      postalCode: 123 45
+                      country: SE
+                    paymentDetails:
+                      type: bankgiro
+                      bankgiroNumber: 5174-8895
+        "404":
+          description: Supplier not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: Supplier not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    put:
+      tags:
+        - suppliers
+      summary: "[Preview] Update a supplier"
+      description: |
+        Update an existing supplier for the company.
+
+        **Scope:** `suppliers:write`
+      operationId: put-supplier
+      requestBody:
+        description: Post the necessary fields for the API to update a supplier.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/supplier"
+            examples:
+              Update supplier:
+                value:
+                  name: Updated Supplier ABC
+                  orgNumber: 556677-8899
+                  vatNumber: SE123456789001
+                  currency: SEK
+                  address:
+                    line1: Älvsborgsvägen 10
+                    line2: c/o Test
+                    city: Gothenburg
+                    postalCode: 123 45
+                    country: SE
+                  paymentDetails:
+                    type: internationalPayment
+                    iban: SE1234567890123456789012
+                    bic: SWEDSESS
+      responses:
+        "200":
+          description: Supplier updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/supplier"
+              examples:
+                Supplier updated:
+                  value:
+                    id: 12345678-abcd-1234-abcd-1234567890ab
+                    name: Updated Supplier ABC
+                    orgNumber: 556677-8899
+                    vatNumber: SE123456789001
+                    currency: SEK
+                    address:
+                      line1: Älvsborgsvägen 10
+                      line2: c/o Test
+                      city: Gothenburg
+                      postalCode: 123 45
+                      country: SE
+                    paymentDetails:
+                      type: internationalPayment
+                      iban: SE1234567890123456789012
+                      bic: SWEDSESS
+        "400":
+          description: Missing required information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 1 error
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/name"
+                        message: The name field is required
+        "404":
+          description: Supplier not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: not-found
+                    message: Supplier not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - suppliers
+      summary: "[Preview] Delete a supplier"
+      description: |
+        Delete an existing supplier for the company.
+
+        NOTE: Currently only supports deleting suppliers that have been added through the API.
+
+        **Scope:** `suppliers:write`
+      operationId: delete-supplier
+      responses:
+        "204":
+          description: Supplier deleted
+        "400":
+          description: Operation not allowed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Not created by integration:
+                  value:
+                    code: operation-not-allowed
+                    message: Bokio API only supports deleting suppliers that have been added through the API by the same integration.
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                Supplier has active invoices:
+                  value:
+                    code: operation-not-allowed
+                    message: Cannot delete supplier with active invoices.
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
@@ -5049,6 +5669,8 @@ components:
             journal-entries:read: Read access to journal entries
             journal-entries:write: Write access to journal entries
             sie:read: Read access to SIE files
+            suppliers:read: Read access to suppliers
+            suppliers:write: Write access to suppliers
             tags:read: Read access to tag groups and tags
             tags:write: Write access to tag groups and tags
             uploads:read: Read access to uploads
@@ -5569,6 +6191,18 @@ components:
           type: string
           nullable: true
           description: The order number associated with the invoice.
+        projectReference:
+          type: string
+          nullable: true
+          description: The project reference associated with the credit note.
+        buyerReference:
+          type: string
+          nullable: true
+          description: The buyer reference associated with the credit note.
+        contractReference:
+          type: string
+          nullable: true
+          description: The contract reference associated with the credit note.
         currency:
           description: ISO 4217 currency code
           type: string
@@ -5678,6 +6312,9 @@ components:
         creditDate: 2024-10-15
         dueDate: 2024-11-15
         publishedDateTime: 2024-10-15T12:00:00
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
         lineItems:
           - id: 1
             itemRef:
@@ -5836,7 +6473,6 @@ components:
       title: invoice
       required:
         - invoiceDate
-        - dueDate
         - lineItems
       properties:
         id:
@@ -5887,7 +6523,20 @@ components:
           description: The payment reference (OCR number) for the invoice. Populated when the invoice is published, null for drafts.
         orderNumberReference:
           type: string
+          nullable: true
           description: The order number associated with the invoice.
+        projectReference:
+          type: string
+          nullable: true
+          description: The project reference associated with the invoice.
+        buyerReference:
+          type: string
+          nullable: true
+          description: The buyer reference associated with the invoice.
+        contractReference:
+          type: string
+          nullable: true
+          description: The contract reference associated with the invoice.
         currency:
           description: ISO 4217 currency code
           type: string
@@ -5927,6 +6576,7 @@ components:
         dueDate:
           type: string
           format: date
+          description: "The due date for the invoice. Optional — when omitted, it is automatically calculated using the fallback chain: customer payment terms → company payment terms → 30 days from the invoice date."
         publishedDateTime:
           type: string
           format: date-time
@@ -6002,6 +6652,9 @@ components:
         invoiceNumber: "1234"
         paymentReference: null
         orderNumberReference: ORD-5678
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
         currency: SEK
         currencyRate: 1
         totalAmount: 200
@@ -6131,6 +6784,42 @@ components:
       example:
         date: 2024-10-15
         sumBaseCurrency: 15.5
+    paymentServiceFeeSettlementDetails:
+      type: object
+      required:
+        - date
+        - sumBaseCurrency
+        - vatScheme
+      properties:
+        date:
+          type: string
+          format: date
+          description: The date of the settlement
+        sumBaseCurrency:
+          type: number
+          format: decimal
+          description: The settlement amount in base currency. Must be greater than zero.
+        vatScheme:
+          type: string
+          enum:
+            - domestic
+            - eu
+            - nonEu
+            - vatExempt
+          description: |
+            The VAT scheme for the payment service fee. Determines how VAT is handled in the bookkeeping.
+
+            - `domestic` — No reverse charge VAT. The fee is booked as a domestic expense.
+
+            - `eu` — EU reverse charge. The fee is booked with reverse charge VAT (output VAT on account 2645, input VAT on account 2614).
+
+            - `nonEu` — Non-EU reverse charge. Same VAT treatment as EU but booked to a different expense account.
+
+            - `vatExempt` — VAT exempt. The fee is booked as a general administrative expense with no VAT.
+      example:
+        date: 2024-10-15
+        sumBaseCurrency: 25
+        vatScheme: eu
     invoiceSettlementRead:
       type: object
       readOnly: true
@@ -6153,6 +6842,7 @@ components:
             - bankFee
             - badDebt
             - balanceAdjustment
+            - paymentServiceFee
           description: |
             The type of the settlement.
 
@@ -6163,9 +6853,12 @@ components:
             - Bad debts are for uncollectible invoices.
 
             - Balance adjustments are for correcting discrepancies on invoices without affecting bookkeeping.
+
+            - Payment service fees are for charges from payment service providers (e.g. Stripe). Available for Swedish companies only. Supports different VAT schemes for domestic, EU, non-EU, and VAT-exempt transactions.
         invoiceSettlementDetails:
           oneOf:
             - $ref: "#/components/schemas/standardSettlementDetails"
+            - $ref: "#/components/schemas/paymentServiceFeeSettlementDetails"
           discriminator:
             propertyName: reason
             mapping:
@@ -6173,6 +6866,7 @@ components:
               bankFee: "#/components/schemas/standardSettlementDetails"
               badDebt: "#/components/schemas/standardSettlementDetails"
               balanceAdjustment: "#/components/schemas/standardSettlementDetails"
+              paymentServiceFee: "#/components/schemas/paymentServiceFeeSettlementDetails"
           description: The settlement details specific to the settlement type
         journalEntryRef:
           type: object
@@ -6203,20 +6897,25 @@ components:
           enum:
             - currency
             - bankFee
+            - paymentServiceFee
           description: |
             The type of the settlement.
 
             - Currency adjustments are for changes in exchange rates. Currency gain or currency loss is reflected in `sumBaseCurrency` being positive or negative respectively.
 
             - Bank fees are for charges from banks or payment providers.
+
+            - Payment service fees are for charges from payment service providers (e.g. Stripe). Available for Swedish companies only. Requires `vatScheme` in the settlement details.
         invoiceSettlementDetails:
           oneOf:
             - $ref: "#/components/schemas/standardSettlementDetails"
+            - $ref: "#/components/schemas/paymentServiceFeeSettlementDetails"
           discriminator:
             propertyName: reason
             mapping:
               currency: "#/components/schemas/standardSettlementDetails"
               bankFee: "#/components/schemas/standardSettlementDetails"
+              paymentServiceFee: "#/components/schemas/paymentServiceFeeSettlementDetails"
           description: The settlement details specific to the settlement type
       example:
         type: bankFee
@@ -6284,6 +6983,11 @@ components:
         taxRate:
           type: number
           format: double
+        bookkeepingAccountNumber:
+          type: integer
+          format: int32
+          nullable: true
+          description: The bookkeeping account number for this item. If not set, the account will be automatically selected based on the item productType, taxRate, customer and company settings.
       example:
         id: fc967153-1f8a-48d0-b773-fe3e61978263
         description: Product 1
@@ -6292,6 +6996,7 @@ components:
         unitType: piece
         unitPrice: 100
         taxRate: 25
+        bookkeepingAccountNumber: 3920
     descriptionOnlyItem:
       type: object
       title: descriptionOnlyItem
@@ -6320,6 +7025,55 @@ components:
       oneOf:
         - $ref: "#/components/schemas/salesItem"
         - $ref: "#/components/schemas/descriptionOnlyItem"
+    journalEntryTag:
+      type: object
+      title: journalEntryTag
+      description: |
+        A tag applied to a journal entry or transaction.
+        References a tag value (AllowedTagTypeValue) within a tag group (TagType).
+      properties:
+        tagId:
+          type: string
+          format: uuid
+          description: Unique identifier of the tag (value) within the tag group
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+        tagGroupId:
+          type: string
+          format: uuid
+          readOnly: true
+          description: Unique identifier of the tag group this tag belongs to
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        tagName:
+          type: string
+          readOnly: true
+          description: Display name of the tag
+          example: Project Alpha
+        tagGroupName:
+          type: string
+          readOnly: true
+          description: Display name of the tag group
+          example: Project
+        weight:
+          type: number
+          format: double
+          description: |
+            Allocation weight between 0 (exclusive) and 1 (inclusive).
+            Controls how costs/revenues are split in reports.
+            Within a tag group, weights on the same journal entry or transaction must sum to at most 1.
+          minimum: 0
+          exclusiveMinimum: true
+          maximum: 1
+          default: 1
+          example: 0.5
+      required:
+        - tagId
+        - weight
+      example:
+        tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+        tagGroupId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        tagName: Project Alpha
+        tagGroupName: Project
+        weight: 1
     journalEntryItem:
       type: object
       title: journalEntryItem
@@ -6338,11 +7092,20 @@ components:
           type: integer
           format: int32
           example: 1930
+        tags:
+          type: array
+          description: |
+            Transaction-level tags applied to this specific line item.
+            Tags must be applied either at the transaction level (on individual line items) or at the verification level (on the journal entry), but not both on the same journal entry.
+            Within a tag group, weights on the same transaction must sum to at most 1.
+          items:
+            $ref: "#/components/schemas/journalEntryTag"
       example:
         id: 1
         credit: 0
         debit: 200
         account: 1930
+        tags: []
     journalEntry:
       type: object
       title: journalEntry
@@ -6363,6 +7126,14 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/journalEntryItem"
+        tags:
+          type: array
+          description: |
+            Verification-level tags applied to the entire journal entry.
+            Tags must be applied either at the verification level (on the journal entry) or at the transaction level (on individual line items), but not both on the same journal entry.
+            Within a tag group, weights on the same journal entry must sum to at most 1.
+          items:
+            $ref: "#/components/schemas/journalEntryTag"
         reversingJournalEntryId:
           type: string
           format: uuid
@@ -6385,14 +7156,61 @@ components:
             debit: 200
             credit: 0
             account: 1930
+            tags: []
           - id: 2
             debit: 0
             credit: 40
             account: 3011
+            tags: []
           - id: 3
             debit: 0
             credit: 160
             account: 2611
+            tags: []
+        tags: []
+    journalEntryTags:
+      type: object
+      title: journalEntryTags
+      description: |
+        Model for replacing all tags on a journal entry.
+        Either set verification-level tags (using `tags`) or transaction-level tags (using `items[*].tags`), not both.
+        To remove all tags, send empty arrays for both fields.
+      properties:
+        tags:
+          type: array
+          description: |
+            Verification-level tags to apply to the entire journal entry.
+            Must be empty if `items` contains entries with tags.
+          items:
+            $ref: "#/components/schemas/journalEntryTag"
+        items:
+          type: array
+          description: |
+            Transaction-level tags to apply to individual line items.
+            Must be empty (or not include any items with tags) if `tags` is non-empty.
+          items:
+            type: object
+            title: journalEntryItemTags
+            description: Tags to apply to a specific line item of a journal entry.
+            properties:
+              id:
+                type: integer
+                format: int64
+                description: ID of the journal entry line item (transaction)
+                example: 1
+              tags:
+                type: array
+                description: Tags to apply to this line item.
+                items:
+                  $ref: "#/components/schemas/journalEntryTag"
+            required:
+              - id
+              - tags
+      example:
+        tags:
+          - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
+            weight: 1
+        items: []
     tagValue:
       type: object
       title: tagValue
@@ -6498,6 +7316,175 @@ components:
           description: Short alias for quick tagging (max 3 characters, unique per company)
           maxLength: 3
           example: "#"
+    supplierAddress:
+      type: object
+      title: supplierAddress
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          description: ISO 3166-1 alpha-2 country code. Defaults to SE if not provided.
+          type: string
+          format: country
+          default: SE
+      example:
+        line1: Älvsborgsvägen 10
+        line2: c/o Test
+        city: Gothenburg
+        postalCode: 123 45
+        country: SE
+    bankgiroPaymentDetails:
+      type: object
+      title: bankgiroPaymentDetails
+      required:
+        - type
+        - bankgiroNumber
+      properties:
+        type:
+          type: string
+          enum:
+            - bankgiro
+        bankgiroNumber:
+          type: string
+          description: The bankgiro number for the supplier
+      example:
+        type: bankgiro
+        bankgiroNumber: 1234-5678
+    plusgiroPaymentDetails:
+      type: object
+      title: plusgiroPaymentDetails
+      required:
+        - type
+        - plusgiroNumber
+      properties:
+        type:
+          type: string
+          enum:
+            - plusgiro
+        plusgiroNumber:
+          type: string
+          description: The plusgiro number for the supplier
+      example:
+        type: plusgiro
+        plusgiroNumber: 12345-6
+    transferPaymentDetails:
+      type: object
+      title: transferPaymentDetails
+      required:
+        - type
+        - clearingNumber
+        - accountNumber
+      properties:
+        type:
+          type: string
+          enum:
+            - transfer
+        clearingNumber:
+          type: string
+          description: Bank clearing number
+        accountNumber:
+          type: string
+          description: Bank account number
+      example:
+        type: transfer
+        clearingNumber: "1234"
+        accountNumber: "1234567890"
+    internationalPaymentDetails:
+      type: object
+      title: internationalPaymentDetails
+      required:
+        - type
+        - iban
+        - bic
+      properties:
+        type:
+          type: string
+          enum:
+            - internationalPayment
+        iban:
+          type: string
+          description: International Bank Account Number
+        bic:
+          type: string
+          description: Bank Identifier Code (SWIFT code)
+      example:
+        type: internationalPayment
+        iban: SE1234567890123456789012
+        bic: SWEDSESS
+    paymentDetails:
+      type: object
+      title: paymentDetails
+      required:
+        - type
+      discriminator:
+        propertyName: type
+        mapping:
+          bankgiro: "#/components/schemas/bankgiroPaymentDetails"
+          plusgiro: "#/components/schemas/plusgiroPaymentDetails"
+          transfer: "#/components/schemas/transferPaymentDetails"
+          internationalPayment: "#/components/schemas/internationalPaymentDetails"
+      oneOf:
+        - $ref: "#/components/schemas/bankgiroPaymentDetails"
+        - $ref: "#/components/schemas/plusgiroPaymentDetails"
+        - $ref: "#/components/schemas/transferPaymentDetails"
+        - $ref: "#/components/schemas/internationalPaymentDetails"
+    supplier:
+      type: object
+      title: supplier
+      required:
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        orgNumber:
+          type: string
+        vatNumber:
+          type: string
+        currency:
+          type: string
+          description: |
+            ISO 4217 currency code. Defaults to SEK if not provided.
+
+            Sets the currency for the supplier, which determines the currency used when creating supplier invoices. When a non-SEK currency is set, exchange rates are automatically calculated to determine the correct SEK amount — no manual exchange rate lookup is needed.
+
+            Allowed values depend on whether the company has a Bokio Business Account (BBA):
+
+            **With Bokio Business Account:** `SEK`, `EUR`, `NOK`, `USD`, `DKK`, `GBP`, `PLN`, `RON`, `CZK`, `HUF`, `ISK`, `CHF`
+
+            Note: For companies with a Bokio Business Account, only currencies supported by BBA are available. For supplier invoices that cannot be paid via BBA, the currency must be set to `SEK` and exchange rates must be handled manually.
+
+            **Without Bokio Business Account:** `SEK`, `GBP`, `EUR`, `USD`, `NOK`, `DKK`, `AUD`, `BRL`, `CAD`, `CHF`, `CNY`, `CZK`, `HKD`, `HUF`, `IDR`, `INR`, `ISK`, `JPY`, `KRW`, `MAD`, `MXN`, `NZD`, `PLN`, `RUB`, `SAR`, `SGD`, `THB`, `TRY`, `ZAR`
+          default: SEK
+        address:
+          $ref: "#/components/schemas/supplierAddress"
+        paymentDetails:
+          $ref: "#/components/schemas/paymentDetails"
+      example:
+        id: 12345678-abcd-1234-abcd-1234567890ab
+        name: Example Supplier
+        orgNumber: 556677-8899
+        vatNumber: SE123456789001
+        currency: SEK
+        address:
+          line1: Älvsborgsvägen 10
+          line2: c/o Test
+          city: Gothenburg
+          postalCode: 123 45
+          country: SE
+        paymentDetails:
+          type: bankgiro
+          bankgiroNumber: 1234-5678
     tagValueWrite:
       type: object
       title: tagValueWrite
