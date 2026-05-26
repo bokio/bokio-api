@@ -236,7 +236,7 @@ paths:
       security:
         - tokenAuth: []
         - access_token: []
-  "/connections/{connectionId}":
+  /connections/{connectionId}:
     get:
       tags:
         - connections
