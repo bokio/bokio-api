@@ -159,7 +159,7 @@ paths:
         - name: bokio_tenantid
           in: query
           required: false
-          description: The Bokio tenant ID to authorize the integration to have access. Bokioio company ID will be the teant ID when the tenant_type is `company`.
+          description: The Bokio tenant ID to authorize the integration to have access. Bokio company ID will be the teant ID when the tenant_type is `company`.
           schema:
             type: string
             format: uuid

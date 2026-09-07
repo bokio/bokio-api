@@ -441,6 +441,21 @@ paths:
                     - account: 8001
                       name: Custom Account
                       accountType: customAccount
+        "400":
+          description: Invalid query filter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                invalid-filter:
+                  value:
+                    code: validation-error
+                    message: The provided filter 'account===oops' is not valid. Please check the format of the query parameter
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: query
+                        message: The provided filter 'account===oops' is not valid. Please check the format of the query parameter
         "404":
           description: Company not found
           content:
@@ -526,10 +541,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  companyInformation:
-                    $ref: "#/components/schemas/companyInformation"
+                $ref: "#/components/schemas/companyInformation"
         "404":
           description: Company not found
           content:
@@ -888,6 +900,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -1068,6 +1081,8 @@ paths:
         Creates a customer for the company.
 
         **Scope:** `customers:write`
+
+        If `customerNumber` is omitted or null, the next numeric customer number is suggested automatically. A supplied customer number is preserved exactly.
       operationId: post-customer
       requestBody:
         description: Post the necessary fields for the API to create a customer.
@@ -1079,6 +1094,7 @@ paths:
               New customer:
                 value:
                   name: customer 1
+                  customerNumber: CUST-001
                   type: company
                   vatNumber: SE1234567890
                   orgNumber: 123456-7890
@@ -1106,6 +1122,7 @@ paths:
                 customer created:
                   value:
                     name: customer 1
+                    customerNumber: CUST-001
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
@@ -1150,7 +1167,7 @@ paths:
         - customers
       summary: Get customers
       description: |-
-        Get all customers for the company. Use the query parameters to filter and navigate through the results.
+        Get all customers for the company. Use the query parameters to filter and navigate through the results. Customers are returned in descending customer-number order: alphanumeric values first, followed by purely numeric values in descending numeric order.
         **Scope:** `customers:read`
       operationId: get-customer
       parameters:
@@ -1180,13 +1197,14 @@ paths:
             | Field                | Type        |
             | -------------------- | ----------- |
             | name                 | string      |
+            | customerNumber      | string      |
             | type                 | string      |
             | vatNumber            | string      |
             | orgNumber            | string      |
             | modifiedDateTime     | date-time   |
           schema:
             type: string
-          example: name==customer 1
+          example: customerNumber==CUST-001
       responses:
         "200":
           description: Customers found
@@ -1242,6 +1260,7 @@ paths:
                   value:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
+                    customerNumber: CUST-001
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
@@ -1282,6 +1301,8 @@ paths:
         Update an existing customer for the company.
 
         **Scope:** `customers:write`
+
+        If `customerNumber` is omitted or null, the existing customer number is preserved. A supplied customer number replaces it and is preserved exactly.
       operationId: put-customer
       requestBody:
         description: Post the necessary fields for the API to update a customer.
@@ -1294,6 +1315,7 @@ paths:
                 value:
                   id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                   name: customer 1
+                  customerNumber: CUST-001
                   type: company
                   vatNumber: SE1234567890
                   orgNumber: 123456-7890
@@ -1323,6 +1345,7 @@ paths:
                   value:
                     id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                     name: customer 1
+                    customerNumber: CUST-001
                     type: company
                     vatNumber: SE1234567890
                     orgNumber: 123456-7890
@@ -1602,6 +1625,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -1734,6 +1758,14 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: projectId
+          in: query
+          required: false
+          description: Return only invoices with at least one line item assigned to this project. When combined with `query`, both filters must match the invoice.
+          schema:
+            type: string
+            format: uuid
+          example: d925b708-1fd4-4f37-9687-14a2648f49fb
         - name: query
           in: query
           required: false
@@ -1744,7 +1776,8 @@ paths:
             | Field                | Type        |
             | -------------------- | ----------- |
             | type                 | string      |
-            | customerRef          | string      |
+            | customerRef.id       | uuid        |
+            | customerRef.customerNumber | string  |
             | orderNumberReference | string      |
             | projectReference     | string      |
             | buyerReference       | string      |
@@ -1757,7 +1790,13 @@ paths:
             | metadata             | string      |
           schema:
             type: string
-          example: dueDate==2024-10-10&&currency==SEK
+          examples:
+            by fields:
+              value: dueDate==2024-10-10&&currency==SEK
+            by customer id:
+              value: customerRef.id==55c899c5-82b2-47fa-9c51-e35fc9b26443
+            by customer number:
+              value: customerRef.customerNumber==CUST-001
       responses:
         "200":
           description: Invoices found
@@ -1820,6 +1859,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -2025,6 +2065,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -2546,6 +2587,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -2721,6 +2763,16 @@ paths:
                   quantity: 1
                   unitPrice: 100
                   taxRate: 25
+              New line item with custom unit:
+                value:
+                  description: Consulting session
+                  itemType: salesItem
+                  productType: services
+                  unitType: custom
+                  customUnitType: session
+                  quantity: 1
+                  unitPrice: 100
+                  taxRate: 25
               Full line item:
                 value:
                   id: 1
@@ -2766,6 +2818,17 @@ paths:
                     costCenterRef:
                       tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
                       tagName: Nord
+                Line item with custom unit:
+                  value:
+                    id: 2
+                    description: Consulting session
+                    itemType: salesItem
+                    productType: services
+                    unitType: custom
+                    customUnitType: session
+                    quantity: 1
+                    unitPrice: 100
+                    taxRate: 25
         "400":
           description: Missing required information
           content:
@@ -3171,6 +3234,7 @@ paths:
                     customerRef:
                       id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
                       name: customer 1
+                      customerNumber: CUST-001
                     contactDetailRef:
                       id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
                       email: contact@customer1.com
@@ -3614,6 +3678,15 @@ paths:
                   unitPrice: 100
                   taxRate: 25
                   bookkeepingAccountNumber: 3920
+              New item with custom unit:
+                value:
+                  description: Box of products
+                  itemType: salesItem
+                  productType: goods
+                  unitType: custom
+                  customUnitType: box
+                  unitPrice: 100
+                  taxRate: 25
       responses:
         "200":
           description: Item created
@@ -3633,6 +3706,16 @@ paths:
                     unitPrice: 100
                     taxRate: 25
                     bookkeepingAccountNumber: 3920
+                Item with custom unit created:
+                  value:
+                    id: 835ba700-b306-4bd9-8447-59207b6b0002
+                    description: Box of products
+                    itemType: salesItem
+                    productType: goods
+                    unitType: custom
+                    customUnitType: box
+                    unitPrice: 100
+                    taxRate: 25
         "400":
           description: Missing Required Information
           content:
@@ -4826,7 +4909,7 @@ paths:
                     currencyRate: 1
                     journalEntryRef:
                       id: 2d8ce6b4-1f3a-46a5-8a9d-5b7f2c4e9d10
-                    rows:
+                    lineItems:
                       - id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
                         description: Consulting
                         quantity: 10
@@ -4918,6 +5001,14 @@ paths:
             format: int32
             default: 25
             maximum: 100
+        - name: projectId
+          in: query
+          required: false
+          description: Return only supplier invoices with at least one line item assigned to this project. When combined with `query`, both filters must match the supplier invoice.
+          schema:
+            type: string
+            format: uuid
+          example: d925b708-1fd4-4f37-9687-14a2648f49fb
         - name: query
           in: query
           required: false
@@ -4969,7 +5060,7 @@ paths:
                         currencyRate: 1
                         journalEntryRef:
                           id: 2d8ce6b4-1f3a-46a5-8a9d-5b7f2c4e9d10
-                        rows:
+                        lineItems:
                           - id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
                             description: Consulting
                             quantity: 10
@@ -4998,7 +5089,7 @@ paths:
                         currencyRate: 1
                         journalEntryRef:
                           id: 3c1a5e7b-9d2f-4b86-ae31-7f4c2d8b6a55
-                        rows:
+                        lineItems:
                           - id: b2c3d4e5-6f7a-8b9c-0d1e-2f3a4b5c6d7e
                             description: Financial advisory
                             quantity: 5
@@ -5014,6 +5105,21 @@ paths:
                               tagName: South
                         uploadRefs:
                           - id: 34e1c9a5-7b2d-4f86-8a31-6d2c5f9b7e40
+        "400":
+          description: Invalid filter or project identifier
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Project not found:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 1 error
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/projectId"
+                        message: The project 'd925b708-1fd4-4f37-9687-14a2648f49fb' does not exist
       security:
         - tokenAuth: []
   /companies/{companyId}/supplier-invoices/{supplierInvoiceId}:
@@ -5066,7 +5172,7 @@ paths:
                     currencyRate: 1
                     journalEntryRef:
                       id: 2d8ce6b4-1f3a-46a5-8a9d-5b7f2c4e9d10
-                    rows:
+                    lineItems:
                       - id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
                         description: Consulting
                         quantity: 10
@@ -5143,7 +5249,7 @@ paths:
                     currencyRate: 1
                     journalEntryRef:
                       id: 2d8ce6b4-1f3a-46a5-8a9d-5b7f2c4e9d10
-                    rows:
+                    lineItems:
                       - id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
                         description: Consulting
                         quantity: 10
@@ -5182,6 +5288,11 @@ paths:
                   value:
                     code: operation-not-allowed
                     message: Bokio API only supports updating supplier invoices that have been added through the API by the same integration.
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                Attestation connected:
+                  value:
+                    code: operation-not-allowed
+                    message: The supplier invoice cannot be modified because it is connected to attestation.
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
         "404":
           description: Supplier invoice not found
@@ -5314,7 +5425,7 @@ paths:
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  /companies/{companyId}/supplier-invoices/{supplierInvoiceId}/rows:
+  /companies/{companyId}/supplier-invoices/{supplierInvoiceId}/line-items:
     parameters:
       - name: companyId
         in: path
@@ -5335,27 +5446,27 @@ paths:
     post:
       tags:
         - supplier-invoices
-      summary: "[Preview] Add a row to a supplier invoice"
+      summary: "[Preview] Add a line item to a supplier invoice"
       description: |
-        Adds a row to an existing supplier invoice. The supplier invoice must have an upload connected before rows can be added.
+        Adds a line item to an existing supplier invoice. The supplier invoice must have an upload connected before line items can be added.
 
         **Scope:** `supplier-invoices:write`
-      operationId: post-supplier-invoice-row
+      operationId: post-supplier-invoice-line-item
       requestBody:
-        description: Post the necessary fields for the API to add a row to the supplier invoice.
+        description: Post the necessary fields for the API to add a line item to the supplier invoice.
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/supplierInvoiceRowItem"
+              $ref: "#/components/schemas/supplierInvoiceLineItem"
             examples:
-              New row:
+              New line item:
                 value:
                   description: Consulting
                   quantity: 10
                   unitPrice: 100
                   unitType: hour
                   taxRate: 25
-              Full row:
+              Full line item:
                 value:
                   description: Consulting
                   quantity: 10
@@ -5368,13 +5479,13 @@ paths:
                     tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
       responses:
         "200":
-          description: Row added
+          description: Line item added
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/supplierInvoiceRowItem"
+                $ref: "#/components/schemas/supplierInvoiceLineItem"
               examples:
-                Row:
+                Line item:
                   value:
                     id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
                     description: Consulting
@@ -5407,11 +5518,16 @@ paths:
                 No upload connected:
                   value:
                     code: validation-error
-                    message: Supplier invoice must have an upload connected before rows can be set
+                    message: Supplier invoice must have an upload connected before line items can be set
                     bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
                     errors:
-                      - field: "#/rows"
-                        message: Supplier invoice must have an upload connected before rows can be set
+                      - field: "#/lineItems"
+                        message: Supplier invoice must have an upload connected before line items can be set
+                Attestation connected:
+                  value:
+                    code: operation-not-allowed
+                    message: The supplier invoice cannot be modified because it is connected to attestation.
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
         "404":
           description: Supplier invoice not found
           content:
@@ -7399,6 +7515,12 @@ components:
           readOnly: true
           description: Name of the customer
           example: Acme AB
+        customerNumber:
+          type: string
+          maxLength: 24
+          readOnly: true
+          description: Customer number of the referenced customer
+          example: CUST-001
     lineItemTaxReduction:
       type: object
       nullable: true
@@ -7531,6 +7653,7 @@ components:
         unitType:
           type: string
           default: unspecified
+          description: When set to `custom`, `customUnitType` is required; otherwise `customUnitType` must be omitted or null.
           enum:
             - unspecified
             - piece
@@ -7555,6 +7678,13 @@ components:
             - minute
             - megabyte
             - ton
+            - custom
+        customUnitType:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 25
+          description: Custom sales unit text. Required when `unitType` is `custom`; must be omitted or null otherwise.
         quantity:
           type: number
           format: double
@@ -7588,7 +7718,8 @@ components:
         description: Installation work
         itemType: salesItem
         productType: services
-        unitType: hour
+        unitType: custom
+        customUnitType: session
         quantity: 10
         unitPrice: 500
         taxRate: 25
@@ -7962,6 +8093,7 @@ components:
         customerRef:
           id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
           name: customer 1
+          customerNumber: CUST-001
         contactDetailRef:
           id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
           email: contact@customer1.com
@@ -8045,6 +8177,14 @@ components:
           readOnly: true
         name:
           type: string
+        customerNumber:
+          type: string
+          minLength: 1
+          maxLength: 24
+          pattern: ^[\s\S]*\S[\s\S]*$
+          nullable: true
+          description: |
+            Customer number. On create, omitting this field or setting it to null automatically suggests the next numeric value. On update, omitting this field or setting it to null preserves the existing value. Supplied values are preserved exactly.
         type:
           type: string
           enum:
@@ -8095,6 +8235,7 @@ components:
       example:
         id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
         name: customer 1
+        customerNumber: CUST-001
         type: company
         vatNumber: SE1234567890
         orgNumber: 123456-7890
@@ -8328,6 +8469,7 @@ components:
         customerRef:
           id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
           name: customer 1
+          customerNumber: CUST-001
         contactDetailRef:
           id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
           email: contact@customer1.com
@@ -8665,6 +8807,7 @@ components:
             - services
         unitType:
           type: string
+          description: When set to `custom`, `customUnitType` is required; otherwise `customUnitType` must be omitted or null.
           enum:
             - unspecified
             - piece
@@ -8689,6 +8832,13 @@ components:
             - minute
             - megabyte
             - ton
+            - custom
+        customUnitType:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 25
+          description: Custom sales unit text. Required when `unitType` is `custom`; must be omitted or null otherwise.
         unitPrice:
           type: number
           format: double
@@ -8968,9 +9118,9 @@ components:
           example: "Synced from external system. Invoice reference: INV-2024-001."
       required:
         - content
-    supplierInvoiceRowItem:
+    supplierInvoiceLineItem:
       type: object
-      title: SupplierInvoiceRowItem
+      title: SupplierInvoiceLineItem
       required:
         - description
         - unitPrice
@@ -8978,7 +9128,7 @@ components:
         id:
           type: string
           format: uuid
-          description: Server-generated identifier. On update, include `id` to match an existing row; omit it to add a new row.
+          description: Server-generated identifier. On update, include `id` to match an existing line item; omit it to add a new line item.
         description:
           type: string
         quantity:
@@ -8990,31 +9140,6 @@ components:
           format: double
         unitType:
           type: string
-          default: unspecified
-          enum:
-            - unspecified
-            - piece
-            - hour
-            - day
-            - month
-            - kilogram
-            - gram
-            - liter
-            - meter
-            - centimeter
-            - millimeter
-            - meterSquared
-            - meterCubic
-            - mile
-            - kilometer
-            - gigabyte
-            - hectar
-            - words
-            - year
-            - week
-            - minute
-            - megabyte
-            - ton
         taxRate:
           type: number
           format: double
@@ -9102,13 +9227,13 @@ components:
               type: string
               format: uuid
               readOnly: true
-        rows:
+        lineItems:
           type: array
           description: |-
-            Rows for the supplier invoice.
+            Line items for the supplier invoice.
             **Preview:** This field is in preview and may change or be removed before general availability. [Read the full preview policy](/reference/versioning#preview)
           items:
-            $ref: "#/components/schemas/supplierInvoiceRowItem"
+            $ref: "#/components/schemas/supplierInvoiceLineItem"
         uploadRefs:
           type: array
           items:
@@ -9127,7 +9252,7 @@ components:
         currencyRate: 1
         journalEntryRef:
           id: 2d8ce6b4-1f3a-46a5-8a9d-5b7f2c4e9d10
-        rows:
+        lineItems:
           - id: a1b2c3d4-5e6f-7a8b-9c0d-1e2f3a4b5c6d
             description: Consulting
             quantity: 10
@@ -9174,13 +9299,13 @@ components:
           format: double
         uploadRef:
           $ref: "#/components/schemas/uploadRef"
-        rows:
+        lineItems:
           type: array
           description: |-
-            Rows for the supplier invoice.
+            Line items for the supplier invoice.
             **Preview:** This field is in preview and may change or be removed before general availability. [Read the full preview policy](/reference/versioning#preview)
           items:
-            $ref: "#/components/schemas/supplierInvoiceRowItem"
+            $ref: "#/components/schemas/supplierInvoiceLineItem"
     supplierInvoiceUpdate:
       type: object
       title: SupplierInvoiceUpdate
@@ -9209,13 +9334,13 @@ components:
         totalAmount:
           type: number
           format: double
-        rows:
+        lineItems:
           type: array
           description: |-
-            Rows for the supplier invoice. Include `id` on a row to update it in place; rows without `id` are added as new. Existing rows not included in the array are removed.
+            Line items for the supplier invoice. Include `id` on a line item to update it in place; line items without `id` are added as new. Existing line items not included in the array are removed.
             **Preview:** This field is in preview and may change or be removed before general availability. [Read the full preview policy](/reference/versioning#preview)
           items:
-            $ref: "#/components/schemas/supplierInvoiceRowItem"
+            $ref: "#/components/schemas/supplierInvoiceLineItem"
     tagValue:
       type: object
       title: tagValue
@@ -9402,6 +9527,7 @@ components:
         customerRef:
           id: d4e5f6a7-b8c9-0123-def1-234567890123
           name: Acme AB
+          customerNumber: CUST-001
         tagRef:
           id: b2c3d4e5-f6a7-8901-bcde-f12345678901
           name: P-001
