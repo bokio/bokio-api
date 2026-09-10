@@ -1,0 +1,1605 @@
+openapi: 3.0.3
+info:
+  version: "1.0"
+  title: Agency API
+  description: The Bokio Agency API containing all resources for agency tenant.
+  termsOfService: https://docs.bokio.se/page/terms/
+  contact:
+    name: Bokio
+    url: https://docs.bokio.se
+    email: support@bokio.se
+servers:
+  - url: https://api.bokio.se/v1
+    description: Bokio API
+    x-bokio-api: true
+security:
+  - tokenAuth: []
+tags:
+  - name: agency-companies
+    description: Operations for managing agency client companies
+  - name: agency-connections
+    description: Operations for managing an integration's agency connections
+  - name: agency-information
+    description: Operations for managing agency information
+  - name: agency-todos
+    description: Operations for managing agency to-do lists
+  - name: agency-users
+    description: Operations for managing agency users
+paths:
+  /agencies/{agencyId}/companies:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+        example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+    post:
+      tags:
+        - agency-companies
+      summary: Create a client company
+      description: |
+        Create a brand-new Bokio company and connect it to the agency as a client.
+
+        The company is created on a free trial. The organization number must be a valid
+        organization number.
+
+        **Scope:** `agency-companies:write`
+      operationId: post-agency-company
+      requestBody:
+        description: The information used to create the new client company.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agencyCompanyWriteModel"
+            examples:
+              New client company:
+                value:
+                  name: Client Company AB
+                  ownerEmail: owner@clientcompany.se
+                  organizationNumber: 556677-8899
+                  vatNumber: SE556677889901
+                  companyType: limitedCompany
+                  accountingMethod: accrual
+                  vatSetting: quarterly
+                  address:
+                    line1: Älvsborgsvägen 10
+                    line2: null
+                    city: Göteborg
+                    postalCode: 123 45
+                    country: SE
+                  fiscalYearStart: 01-01
+      responses:
+        "200":
+          description: Client company created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyCompanyGetModel"
+              example:
+                id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                name: Client Company AB
+                organizationNumber: 556677-8899
+                vatNumber: SE556677889901
+                companyType: limitedCompany
+                address:
+                  line1: Älvsborgsvägen 10
+                  city: Göteborg
+                  postalCode: 123 45
+                  country: SE
+        "400":
+          description: Missing or invalid information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Error:
+                  value:
+                    code: validation-error
+                    message: Validation failed with 2 errors
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/name"
+                        message: The name field is required
+                      - field: "#/organizationNumber"
+                        message: The organizationNumber field is invalid
+        "404":
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    get:
+      tags:
+        - agency-companies
+      summary: Get client companies
+      description: |-
+        Get all client companies connected to the agency. Use the query parameters to filter and navigate through the results.
+        **Scope:** `agency-companies:read`
+      operationId: get-agency-companies
+      parameters:
+        - name: page
+          in: query
+          required: false
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional query to filter the data set with supported fields listed below and [available operations](filtering).
+
+            | Field                | Type        |
+            | -------------------- | ----------- |
+            | name                 | string      |
+            | organizationNumber   | string      |
+          schema:
+            type: string
+          example: name==Client Company AB
+      responses:
+        "200":
+          description: Client companies found
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/agencyCompanyGetModel"
+        "404":
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+        example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+        example: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+    get:
+      tags:
+        - agency-companies
+      summary: Get a client company
+      description: |
+        Retrieve the information of the client company with the matching companyId.
+        The company must belong to the agency.
+
+        **Scope:** `agency-companies:read`
+      operationId: get-agency-company
+      responses:
+        "200":
+          description: Client company found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyCompanyGetModel"
+              example:
+                id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+                name: Client Company AB
+                organizationNumber: 556677-8899
+                vatNumber: SE556677889901
+                companyType: limitedCompany
+                address:
+                  line1: Älvsborgsvägen 10
+                  city: Göteborg
+                  postalCode: 123 45
+                  country: SE
+        "404":
+          description: Client company not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 55c899c5-82b2-47fa-9c51-e35fc9b26443 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/navigation:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+        example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+        example: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+    get:
+      tags:
+        - agency-companies
+      summary: Get a navigation URL for a client company
+      description: |
+        Generate a deep link URL to navigate directly into Bokio for the specified client company.
+        Optionally provide a `todoType` to navigate to a specific area (e.g. unrecorded receipts).
+
+        **Scope:** `agency-companies:read`
+      operationId: get-agency-company-navigation
+      parameters:
+        - name: userId
+          in: query
+          required: true
+          description: The unique identifier for the user initiating the navigation
+          schema:
+            type: string
+            format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        - name: todoType
+          in: query
+          required: false
+          description: |
+            Optional todo type to navigate to a specific area in Bokio for the company.
+          schema:
+            type: string
+          example: receipt.unrecorded
+      responses:
+        "200":
+          description: Navigation URL generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyCompanyNavigation"
+              example:
+                url: https://app.bokio.se/company/55c899c5-82b2-47fa-9c51-e35fc9b26443
+        "400":
+          description: User does not have access to the company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: navigation-not-allowed
+                message: The user doesn't have access to the company
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Company not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 55c899c5-82b2-47fa-9c51-e35fc9b26443 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agency-information:
+    get:
+      tags:
+        - agency-information
+      summary: Search agency information
+      description: |
+        Resolves an exact organization number to an agency. A query is mandatory and name or
+        partial searches are deliberately not supported.
+
+        **Scope:** `agency-information:read`
+      operationId: search-agency-information
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+        - name: query
+          in: query
+          required: true
+          description: |
+            Exact organization number filter, for example
+            `organizationNumber==5566778899`. Dashed and undashed values are equivalent.
+          schema:
+            type: string
+          example: organizationNumber==5566778899
+      responses:
+        "200":
+          description: Matching agencies
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/agencyInformation"
+        "400":
+          description: Missing or invalid query
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - access_token:
+            - agency-information:read
+        - tokenAuth: []
+  /agencies/{agencyId}/agency-information:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+    get:
+      tags:
+        - agency-information
+      summary: Retrieve agency information
+      description: |
+        Retrieve the information of the agency.
+
+        **Scope:** `agency-information:read`
+      operationId: get-agency-information
+      responses:
+        "200":
+          description: Agency information
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyInformation"
+        "404":
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agency-connections:
+    get:
+      tags:
+        - agency-connections
+      summary: Get agency connections
+      description: |
+        Lists active agency connections owned by the authenticated integration.
+
+        **Scope:** `agency-connections:read`
+      operationId: get-agency-connections
+      parameters:
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 1
+        - name: pageSize
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            maximum: 100
+        - name: query
+          in: query
+          required: false
+          description: |
+            Optional filter. Supported fields are `agencyId`, `agencyName`,
+            and `organizationNumber`. Only active connections are listed.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Agency connections
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/agencyConnection"
+      security:
+        - access_token:
+            - agency-connections:read
+        - tokenAuth: []
+    post:
+      tags:
+        - agency-connections
+      summary: Connect to an agency
+      description: |
+        Connects the integration to an existing agency. Requires the integration to be
+        approved for machine to machine auth on the Agency API. Request on already
+        connected agencies will refresh scope to match the requested scope in client
+        credentials grant.
+
+        **Scope:** `agency-connections:write`
+      operationId: create-agency-connection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agencyConnectionCreate"
+      responses:
+        "200":
+          description: Existing connection updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyConnection"
+        "201":
+          description: Agency connection created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyConnection"
+        "400":
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "403":
+          description: The integration does not have an approved agency API client-credentials privilege
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+        "404":
+          description: Agency not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - access_token:
+            - agency-connections:write
+        - tokenAuth: []
+  /agency-connections/{agencyId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The Bokio identifier of the agency
+        schema:
+          type: string
+          format: uuid
+    get:
+      tags:
+        - agency-connections
+      summary: Get an agency connection
+      description: |
+        Gets this integration's active connection to the agency.
+
+        **Scope:** `agency-connections:read`
+      operationId: get-agency-connection
+      responses:
+        "200":
+          description: Agency connection
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyConnection"
+        "404":
+          description: Agency connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - access_token:
+            - agency-connections:read
+        - tokenAuth: []
+    delete:
+      tags:
+        - agency-connections
+      summary: Disconnect from an agency
+      description: |
+        Removes the connection and its agency membership. Agency data is not deleted.
+
+        **Scope:** `agency-connections:write`
+      operationId: delete-agency-connection
+      responses:
+        "204":
+          description: Agency connection deleted
+        "404":
+          description: Agency connection not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+      security:
+        - access_token:
+            - agency-connections:write
+        - tokenAuth: []
+  /agencies/{agencyId}/users:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+    get:
+      tags:
+        - agency-users
+      summary: List agency users
+      description: |
+        Retrieve a list of all users who are members of the agency. Use the query parameters to navigate through the results.
+
+        **Scope:** `agency-users:read`
+      operationId: list-agency-users
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: List of agency users
+          content:
+            application/json:
+              schema:
+                title: agencyUserPagedResponse
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/agencyUserGetModel"
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/users/{userId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: userId
+        in: path
+        required: true
+        description: The unique identifier for the user
+        schema:
+          type: string
+          format: uuid
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    get:
+      tags:
+        - agency-users
+      summary: Get an agency user
+      description: |
+        Retrieve details of a specific user in the agency.
+
+        **Scope:** `agency-users:read`
+      operationId: get-agency-user
+      responses:
+        "200":
+          description: Agency user details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/agencyUserGetModel"
+        "404":
+          description: User not found in this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value b2c3d4e5-f6a7-8901-bcde-f12345678901 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - agency-users
+      summary: Remove a user from the agency
+      description: |
+        Remove a user's membership from the agency.
+        This also removes the user from all client companies managed by the agency
+        (except where the user is the company owner).
+
+        **Scope:** `agency-users:write`
+      operationId: remove-agency-user
+      responses:
+        "204":
+          description: User successfully removed from the agency
+        "400":
+          description: Cannot remove the user (e.g. cannot remove yourself)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: operation-not-allowed
+                message: Cannot remove yourself from the agency
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/users:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the client company
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    get:
+      tags:
+        - agency-users
+      summary: List company users
+      description: |
+        Retrieve a list of all users who are members of a client company managed by the agency. Use the query parameters to navigate through the results.
+
+        **Scope:** `agency-users:read`
+      operationId: list-company-users
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: List of company users
+          content:
+            application/json:
+              schema:
+                title: companyUserPagedResponse
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/companyUserGetModel"
+        "404":
+          description: Company not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/users/{userId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the client company
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      - name: userId
+        in: path
+        required: true
+        description: The unique identifier for the user
+        schema:
+          type: string
+          format: uuid
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    get:
+      tags:
+        - agency-users
+      summary: Get a company user
+      description: |
+        Retrieve details of a specific user in a client company managed by the agency.
+
+        **Scope:** `agency-users:read`
+      operationId: get-company-user
+      responses:
+        "200":
+          description: Company user details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/companyUserGetModel"
+        "404":
+          description: Company or user not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value b2c3d4e5-f6a7-8901-bcde-f12345678901 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    delete:
+      tags:
+        - agency-users
+      summary: Remove a user from a client company
+      description: |
+        Remove a user's membership from one of the agency's client companies.
+        This revokes the user's access to the company.
+
+        **Scope:** `agency-users:write`
+      operationId: remove-company-user
+      responses:
+        "204":
+          description: User successfully removed from the company
+        "400":
+          description: Cannot remove the user (e.g. user is the company owner)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: operation-not-allowed
+                message: Cannot remove a user who is the company owner
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/invitations:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+    get:
+      tags:
+        - agency-users
+      summary: List agency invitations
+      description: |
+        Retrieve a list of pending invitations for the agency. Use the query parameters to navigate through the results.
+
+        **Scope:** `agency-users:read`
+      operationId: list-agency-user-invitations
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: List of agency invitations
+          content:
+            application/json:
+              schema:
+                title: agencyUserInvitationPagedResponse
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/userInvitationGetModel"
+      security:
+        - tokenAuth: []
+    post:
+      tags:
+        - agency-users
+      summary: Invite a user to the agency
+      description: |
+        Invite a user as an agency staff member.
+        Creates a pending invitation and sends an email.
+
+        **Scope:** `agency-users:write`
+      operationId: invite-agency-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/agencyUserInvitationWriteModel"
+      responses:
+        "200":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/userInvitationGetModel"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: validation-error
+                message: A pending invitation already exists for this email address
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/invitations:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the client company
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    get:
+      tags:
+        - agency-users
+      summary: List company invitations
+      description: |
+        Retrieve a list of pending invitations for a client company managed by the agency. Use the query parameters to navigate through the results.
+
+        **Scope:** `agency-users:read`
+      operationId: list-agency-company-user-invitations
+      parameters:
+        - name: page
+          in: query
+          description: Page number
+          schema:
+            type: integer
+            format: int32
+            default: 1
+            minimum: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            format: int32
+            default: 25
+            minimum: 1
+            maximum: 100
+      responses:
+        "200":
+          description: List of company invitations
+          content:
+            application/json:
+              schema:
+                title: agencyCompanyUserInvitationPagedResponse
+                allOf:
+                  - $ref: "#/components/schemas/pagedResponse"
+                  - type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/userInvitationGetModel"
+        "404":
+          description: Company not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+    post:
+      tags:
+        - agency-users
+      summary: Invite a user to a client company
+      description: |
+        Invite a user to one of the agency's client companies.
+        Creates a pending invitation and sends an email.
+
+        **Scope:** `agency-users:write`
+      operationId: invite-agency-company-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/companyUserInvitationWriteModel"
+      responses:
+        "200":
+          description: Invitation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/userInvitationGetModel"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: validation-error
+                message: A pending invitation already exists for this email address
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Company client is not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/users/{userId}/todos:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the company
+        schema:
+          type: string
+          format: uuid
+          example: 17c72e33-77d4-467d-8fe3-f9bd35b303f3
+      - name: userId
+        in: path
+        required: true
+        description: The unique identifier for the user
+        schema:
+          type: string
+          format: uuid
+          example: c294e347-7309-4f61-a37d-31e8ba4f00aa
+    get:
+      tags:
+        - agency-todos
+      summary: Retrieve todos for a user in an agency client company
+      description: |
+        Retrieve the current-state worklist for the specified user in the specified client company that belongs to the specified agency.
+
+        **Localization:** Todo titles are localized based on the `Accept-Language` request header (`sv` or `en`). When the header is missing or the language is not supported, Swedish is used. The resolved language is returned in the `Content-Language` response header.
+
+        **Scope:** `agency-todos:read`
+      operationId: get-agency-company-user-todos
+      parameters:
+        - name: Accept-Language
+          in: header
+          required: false
+          description: Preferred language for localized todo titles. Supported values are `sv` and `en`. Defaults to Swedish when omitted or unsupported.
+          schema:
+            type: string
+            enum:
+              - sv
+              - en
+          example: en
+      responses:
+        "200":
+          description: Todos found
+          headers:
+            Content-Language:
+              description: The language used for the localized todo titles in the response.
+              schema:
+                type: string
+              example: en-SE
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/agencyTodoItemGet"
+              examples:
+                Todos:
+                  value:
+                    - resourceType: supplierInvoice
+                      actionType: toPay
+                      title: Match supplier payment
+                      totalAmount: 1500
+                      date: 2026-06-20
+                    - resourceType: receipt
+                      actionType: toRecord
+                      title: Upload missing receipt
+                      totalAmount: 450
+                      date: 2026-06-21
+        "404":
+          description: Agency, company, or user not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+components:
+  securitySchemes:
+    tokenAuth:
+      type: http
+      scheme: bearer
+    access_token:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: /token
+          scopes:
+            agency-companies:read: Read agency companies
+            agency-companies:write: Manage agency companies
+            agency-company-navigation:write: Navigate agency companies
+            agency-connections:read: Read agency connections
+            agency-connections:write: Manage agency connections
+            agency-information:read: Read agency information
+            agency-permissions:write: Manage agency permissions
+            agency-todos:read: Read agency todos
+            agency-users:read: Read agency users
+            agency-users:write: Manage agency users
+        authorizationCode:
+          authorizationUrl: /authorize
+          tokenUrl: /token
+          scopes:
+            agency-companies:read: Read agency companies
+            agency-companies:write: Manage agency companies
+            agency-company-navigation:write: Navigate agency companies
+            agency-information:read: Read agency information
+            agency-permissions:write: Manage agency permissions
+            agency-todos:read: Read agency todos
+            agency-users:read: Read agency users
+            agency-users:write: Manage agency users
+    client_auth:
+      type: http
+      scheme: basic
+  schemas:
+    pagedResponse:
+      type: object
+      title: pagedResponse
+      properties:
+        totalItems:
+          type: integer
+          format: int32
+          example: 1
+        totalPages:
+          type: integer
+          format: int32
+          example: 1
+        currentPage:
+          type: integer
+          format: int32
+          example: 1
+    address:
+      type: object
+      title: address
+      properties:
+        line1:
+          type: string
+        line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+        postalCode:
+          type: string
+        country:
+          description: ISO 3166-1 alpha-2 country code
+          type: string
+          format: country
+      example:
+        line1: Älvsborgsvägen 10
+        line2: null
+        city: Göteborg
+        postalCode: 123 45
+        country: SE
+    agencyCompanyGetModel:
+      title: agencyCompanyGetModel
+      type: object
+      required:
+        - id
+        - name
+        - organizationNumber
+        - companyType
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the company
+        name:
+          type: string
+          description: Name of the company
+        organizationNumber:
+          type: string
+          description: Organization number of the company
+        vatNumber:
+          type: string
+          nullable: true
+          description: VAT number of the company
+        companyType:
+          type: string
+          description: Company type of the company
+          enum:
+            - proprietorship
+            - limitedCompany
+            - limitedPartnership
+            - partnership
+            - cooperative
+            - nonProfitAssociation
+            - communityAssociation
+            - religiousCommunity
+        address:
+          allOf:
+            - $ref: "#/components/schemas/address"
+      example:
+        id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+        name: Client Company AB
+        organizationNumber: 556677-8899
+        vatNumber: SE556677889901
+        companyType: limitedCompany
+        address:
+          line1: Älvsborgsvägen 10
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+    apiError:
+      type: object
+      title: apiError
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        bokioErrorId:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+    agencyCompanyWriteModel:
+      title: agencyCompanyWriteModel
+      type: object
+      required:
+        - name
+        - organizationNumber
+        - companyType
+        - ownerEmail
+        - accountingMethod
+        - vatSetting
+      properties:
+        name:
+          type: string
+          description: Name of the company
+        ownerEmail:
+          type: string
+          format: email
+          description: |
+            Email of the company owner. Must belong to an existing user that is a member of the
+            agency. This user becomes the owner of the created company so they can access it.
+        organizationNumber:
+          type: string
+          description: Organization number of the company
+        vatNumber:
+          type: string
+          nullable: true
+          description: VAT number of the company
+        companyType:
+          type: string
+          description: Company type of the company
+          enum:
+            - proprietorship
+            - limitedCompany
+            - limitedPartnership
+            - partnership
+            - cooperative
+            - nonProfitAssociation
+            - communityAssociation
+            - religiousCommunity
+        accountingMethod:
+          type: string
+          description: The accounting method used by the company.
+          enum:
+            - cash
+            - accrual
+        vatSetting:
+          type: string
+          description: The VAT reporting period of the company.
+          enum:
+            - yearly
+            - quarterly
+            - monthly
+            - notRegisteredForVat
+        address:
+          allOf:
+            - $ref: "#/components/schemas/address"
+        fiscalYearStart:
+          type: string
+          description: |
+            The start of the company's fiscal year as a month and day in `MM-DD` format.
+            Defaults to `01-01` when omitted.
+          pattern: ^(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$
+          example: 01-01
+      example:
+        name: Client Company AB
+        ownerEmail: owner@example.com
+        organizationNumber: 556677-8899
+        vatNumber: SE556677889901
+        companyType: limitedCompany
+        accountingMethod: accrual
+        vatSetting: monthly
+        address:
+          line1: Älvsborgsvägen 10
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        fiscalYearStart: 01-01
+    agencyCompanyNavigation:
+      title: agencyCompanyNavigation
+      type: object
+      required:
+        - url
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Deep link URL to navigate into Bokio for the company
+      example:
+        url: https://app.bokio.se/company/55c899c5-82b2-47fa-9c51-e35fc9b26443
+    agencyInformation:
+      title: agencyInformation
+      type: object
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the agency
+        name:
+          type: string
+          description: Name of the agency
+        organizationNumber:
+          type: string
+          description: Organization number of the agency
+      example:
+        id: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        name: Redovisningsbyrån AB
+        organizationNumber: 556677-8899
+    agencyConnection:
+      title: agencyConnection
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - agencyId
+        - agencyName
+        - scopes
+        - status
+        - connectedDatetime
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Informational connection identifier
+        agencyId:
+          type: string
+          format: uuid
+        agencyName:
+          type: string
+        organizationNumber:
+          type: string
+          nullable: true
+        scopes:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum:
+            - active
+            - disconnected
+        connectedDatetime:
+          type: string
+          format: date-time
+    agencyConnectionCreate:
+      title: agencyConnectionCreate
+      type: object
+      additionalProperties: false
+      required:
+        - agencyId
+      properties:
+        agencyId:
+          type: string
+          format: uuid
+          description: The Bokio identifier of an existing agency
+    agencyUserGetModel:
+      title: agencyUserGetModel
+      type: object
+      required:
+        - id
+        - email
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+          nullable: true
+        name:
+          type: string
+          description: Display name of the user
+          nullable: true
+        status:
+          type: string
+          enum:
+            - active
+          description: Status of the user
+      example:
+        id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+        email: staff@agency.com
+        name: Erik Svensson
+        status: active
+    companyUserGetModel:
+      title: companyUserGetModel
+      type: object
+      required:
+        - id
+        - email
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user
+        email:
+          type: string
+          format: email
+          description: Email address of the user
+          nullable: true
+        name:
+          type: string
+          description: Display name of the user
+          nullable: true
+        status:
+          type: string
+          enum:
+            - active
+          description: Status of the user
+      example:
+        id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+        email: user@example.com
+        name: Anna Andersson
+        status: active
+    userInvitationGetModel:
+      title: userInvitationGetModel
+      type: object
+      required:
+        - id
+        - email
+        - status
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the invitation
+        email:
+          type: string
+          format: email
+          description: Email address of the invited user
+        status:
+          type: string
+          enum:
+            - pendingInvitation
+          description: Status of the invitation
+      example:
+        id: f47ac10b-58cc-4372-a567-0e02b2c3d479
+        email: user@example.com
+        status: pendingInvitation
+    agencyUserInvitationWriteModel:
+      title: agencyUserInvitationWriteModel
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user to invite
+          example: staff@agency.com
+    companyUserInvitationWriteModel:
+      title: companyUserInvitationWriteModel
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email address of the user to invite
+          example: user@example.com
+    agencyTodoItemGet:
+      title: agencyTodoItemGet
+      type: object
+      properties:
+        resourceType:
+          type: string
+          enum:
+            - none
+            - vat
+            - supplierInvoice
+            - invoice
+            - payment
+            - receipt
+            - expense
+          description: Type of resource represented by the todo item
+        actionType:
+          type: string
+          enum:
+            - none
+            - toApprove
+            - toRecord
+            - toPay
+            - toSchedulePay
+            - getPaid
+          description: Action represented by the todo item
+        title:
+          type: string
+          description: Title shown for the todo item
+        totalAmount:
+          type: number
+          format: double
+          nullable: true
+          description: Amount associated with the todo item when applicable
+        date:
+          type: string
+          format: date
+          description: Primary date associated with the todo item
+      example:
+        resourceType: supplierInvoice
+        actionType: toPay
+        title: Match supplier payment
+        totalAmount: 1500
+        date: 2026-06-20
+x-readme:
+  explorer-enabled: true
+  proxy-enabled: true

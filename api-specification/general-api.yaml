@@ -31,7 +31,10 @@ paths:
 
         - Use Authorization Code grant to obtain access token for a Company to use with the Company API.
         - Use Refresh Token grant to obtain a new access token using a refresh token.
-        - Use Client Credentials grant to obtain access token for the General API.
+        - Use Client Credentials grant without a scope to obtain a legacy General API token.
+        - Approved integrations may request Agency API scopes with Client Credentials for
+          machine-to-machine agency access. This requires the integration to hold an approved
+          agency API client-credentials privilege at the integration level.
       operationId: request-token
       requestBody:
         content:
@@ -80,6 +83,9 @@ paths:
                     grant_type:
                       enum:
                         - client_credentials
+                    scope:
+                      type: string
+                      description: Space-delimited Agency API scopes. Omit for the legacy General API flow.
                   required:
                     - grant_type
       responses:
@@ -378,7 +384,8 @@ components:
           type: string
           enum:
             - company
-          description: The type of connection (e.g., company)
+            - agency
+          description: The type of connection
     apiError:
       type: object
       title: apiError
