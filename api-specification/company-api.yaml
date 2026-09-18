@@ -667,6 +667,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/creditNote"
+              examples:
+                Credit note with discount:
+                  $ref: "#/components/examples/creditNoteResponseWithDiscount"
+                Credit note response:
+                  $ref: "#/components/examples/creditNoteResponseWithTaxReduction"
         "404":
           description: Credit note not found
           content:
@@ -746,6 +751,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/creditNote"
+              examples:
+                Credit note with discount:
+                  $ref: "#/components/examples/creditNoteResponseWithDiscount"
+                Credit note response:
+                  $ref: "#/components/examples/creditNoteResponseWithTaxReduction"
         "400":
           description: Bad request
           content:
@@ -833,6 +843,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/creditNote"
+              examples:
+                Credit note with discount:
+                  $ref: "#/components/examples/creditNoteResponseWithDiscount"
+                Credit note response:
+                  $ref: "#/components/examples/creditNoteResponseWithTaxReduction"
         "400":
           description: Credit note cannot be published
           content:
@@ -962,9 +977,9 @@ paths:
                           deductionAmount: 1500
                     attachmentRefs:
                       - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-                        name: myfile.pdf
+                        fileName: myfile.pdf
                       - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-                        name: myfile2.pdf
+                        fileName: myfile2.pdf
                     journalEntryRef:
                       id: 89c9566a-9f7a-4894-aedd-4f382006f687
                     metadata:
@@ -1547,167 +1562,10 @@ paths:
               $ref: "#/components/schemas/invoice"
             examples:
               New invoice:
-                value:
-                  type: invoice
-                  customerRef:
-                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                    name: customer 1
-                  contactDetailRef:
-                    id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-                  invoiceNumber: "1234"
-                  orderNumberReference: ORD-5678
-                  projectReference: PROJ-001
-                  buyerReference: BUYER-123
-                  contractReference: CONTRACT-456
-                  currency: SEK
-                  currencyRate: 1
-                  totalAmount: 10000
-                  totalTax: 2500
-                  paidAmount: 0
-                  invoiceDate: 2024-10-10
-                  dueDate: 2024-10-10
-                  lineItems:
-                    - description: Product 1
-                      itemRef:
-                        id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                      itemType: salesItem
-                      productType: goods
-                      unitType: piece
-                      quantity: 1
-                      unitPrice: 5000
-                      taxRate: 25
-                    - description: Installation work
-                      itemType: salesItem
-                      productType: services
-                      unitType: hour
-                      quantity: 10
-                      unitPrice: 500
-                      taxRate: 25
-                      projectRef:
-                        id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-                      costCenterRef:
-                        tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-                      taxReduction:
-                        taxReductionType: rot
-                        jobType: rotConstruction
-                    - description: A description line
-                      itemType: descriptionOnlyItem
-                  deliveryAddress:
-                    line1: Delivery Street 15
-                    line2: Floor 2
-                    city: Stockholm
-                    postalCode: 111 11
-                    country: SE
-                  taxReduction:
-                    type: rot
-                    description: Bathroom renovation
-                    propertyType: realEstate
-                    realEstateNumber: STOCKHOLM SÖDER 1:2
-                    deductionPeople:
-                      - personalNumber: 19850101-1234
-                        deductionAmount: 1500
-                  metadata:
-                    project: Website Redesign
-                    department: IT
-                    externalId: EXT-INV-2024-001
+                $ref: "#/components/examples/invoiceRequest"
       responses:
         "200":
-          description: Invoice created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/invoice"
-              examples:
-                invoice created:
-                  value:
-                    id: a419cf69-db6f-4de9-992c-b1a60942a443
-                    type: invoice
-                    customerRef:
-                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                      name: customer 1
-                      customerNumber: CUST-001
-                    contactDetailRef:
-                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-                      email: contact@customer1.com
-                      phone: "+46701234567"
-                    invoiceNumber: "1234"
-                    paymentReference: null
-                    orderNumberReference: ORD-5678
-                    projectReference: PROJ-001
-                    buyerReference: BUYER-123
-                    contractReference: CONTRACT-456
-                    currency: SEK
-                    currencyRate: 1
-                    totalAmount: 10000
-                    totalTax: 2500
-                    paidAmount: 0
-                    status: draft
-                    invoiceDate: 2024-10-10
-                    dueDate: 2024-10-10
-                    lineItems:
-                      - id: 1
-                        itemRef:
-                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                          description: Product 1
-                        description: Product 1
-                        itemType: salesItem
-                        productType: goods
-                        unitType: piece
-                        quantity: 1
-                        unitPrice: 5000
-                        taxRate: 25
-                      - id: 2
-                        description: Installation work
-                        itemType: salesItem
-                        productType: services
-                        unitType: hour
-                        quantity: 10
-                        unitPrice: 500
-                        taxRate: 25
-                        projectRef:
-                          id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-                          projectName: Website Redesign
-                          projectNumber: P-001
-                        costCenterRef:
-                          tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-                          tagName: Nord
-                        taxReduction:
-                          taxReductionType: rot
-                          jobType: rotConstruction
-                      - id: 3
-                        description: A description line
-                        itemType: descriptionOnlyItem
-                    billingAddress:
-                      line1: Älvsborgsvägen 10
-                      line2: null
-                      city: Göteborg
-                      postalCode: 123 45
-                      country: SE
-                    deliveryAddress:
-                      line1: Delivery Street 15
-                      line2: Floor 2
-                      city: Stockholm
-                      postalCode: 111 11
-                      country: SE
-                    taxReduction:
-                      type: rot
-                      description: Bathroom renovation
-                      propertyType: realEstate
-                      realEstateNumber: STOCKHOLM SÖDER 1:2
-                      deductionAmount: 1500
-                      status: draft
-                      deductionPeople:
-                        - personalNumber: 19850101-1234
-                          deductionAmount: 1500
-                    attachmentRefs:
-                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-                        fileName: myfile.pdf
-                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-                        fileName: myfile2.pdf
-                    metadata:
-                      project: Website Redesign
-                      department: IT
-                      externalId: EXT-INV-2024-001
+          $ref: "#/components/responses/invoiceResponse"
         "400":
           description: Missing required information
           content:
@@ -1846,103 +1704,7 @@ paths:
       operationId: get-invoices-invoiceId
       responses:
         "200":
-          description: Invoice found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/invoice"
-              examples:
-                Update invoice:
-                  value:
-                    id: a419cf69-db6f-4de9-992c-b1a60942a443
-                    type: invoice
-                    customerRef:
-                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                      name: customer 1
-                      customerNumber: CUST-001
-                    contactDetailRef:
-                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-                      email: contact@customer1.com
-                      phone: "+46701234567"
-                    invoiceNumber: "1234"
-                    paymentReference: null
-                    orderNumberReference: ORD-5678
-                    projectReference: PROJ-001
-                    buyerReference: BUYER-123
-                    contractReference: CONTRACT-456
-                    currency: SEK
-                    currencyRate: 1
-                    totalAmount: 10000
-                    totalTax: 2500
-                    paidAmount: 0
-                    status: draft
-                    invoiceDate: 2024-10-10
-                    dueDate: 2024-10-10
-                    lineItems:
-                      - id: 1
-                        itemRef:
-                          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                        description: Product 1
-                        itemType: salesItem
-                        productType: goods
-                        unitType: piece
-                        quantity: 1
-                        unitPrice: 5000
-                        taxRate: 25
-                      - id: 2
-                        description: Installation work
-                        itemType: salesItem
-                        productType: services
-                        unitType: hour
-                        quantity: 10
-                        unitPrice: 500
-                        taxRate: 25
-                        projectRef:
-                          id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-                          projectName: Website Redesign
-                          projectNumber: P-001
-                        costCenterRef:
-                          tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-                          tagName: Nord
-                        taxReduction:
-                          taxReductionType: rot
-                          jobType: rotConstruction
-                      - id: 3
-                        description: A description line
-                        itemType: descriptionOnlyItem
-                    billingAddress:
-                      line1: Älvsborgsvägen 10
-                      line2: null
-                      city: Göteborg
-                      postalCode: 123 45
-                      country: SE
-                    deliveryAddress:
-                      line1: Delivery Street 15
-                      line2: Floor 2
-                      city: Stockholm
-                      postalCode: 111 11
-                      country: SE
-                    taxReduction:
-                      type: rot
-                      description: Bathroom renovation
-                      propertyType: realEstate
-                      realEstateNumber: STOCKHOLM SÖDER 1:2
-                      deductionAmount: 1500
-                      status: draft
-                      deductionPeople:
-                        - personalNumber: 19850101-1234
-                          deductionAmount: 1500
-                    attachmentRefs:
-                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-                        fileName: myfile.pdf
-                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-                        fileName: myfile2.pdf
-                    journalEntryRef:
-                      id: e7f8a972-5a21-411b-aed2-f224d1b6fd68
-                    metadata:
-                      project: Website Redesign
-                      department: IT
-                      externalId: EXT-INV-2024-001
+          $ref: "#/components/responses/invoiceResponse"
         "404":
           description: Invoice not found
           content:
@@ -1983,171 +1745,10 @@ paths:
               $ref: "#/components/schemas/invoice"
             examples:
               Update invoice:
-                value:
-                  id: a419cf69-db6f-4de9-992c-b1a60942a443
-                  type: invoice
-                  customerRef:
-                    id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                    name: customer 1
-                  contactDetailRef:
-                    id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-                  invoiceNumber: "1234"
-                  orderNumberReference: ORD-5678
-                  projectReference: PROJ-001
-                  buyerReference: BUYER-123
-                  contractReference: CONTRACT-456
-                  currency: SEK
-                  currencyRate: 1
-                  totalAmount: 10000
-                  totalTax: 2500
-                  paidAmount: 0
-                  invoiceDate: 2024-10-10
-                  dueDate: 2024-10-10
-                  lineItems:
-                    - id: 1
-                      description: Product 1
-                      itemType: salesItem
-                      productType: goods
-                      unitType: piece
-                      quantity: 1
-                      unitPrice: 5000
-                      taxRate: 25
-                    - id: 2
-                      description: Installation work
-                      itemType: salesItem
-                      productType: services
-                      unitType: hour
-                      quantity: 10
-                      unitPrice: 500
-                      taxRate: 25
-                      projectRef:
-                        id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-                      costCenterRef:
-                        tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-                      taxReduction:
-                        taxReductionType: rot
-                        jobType: rotConstruction
-                    - id: 3
-                      itemRef:
-                        id: e964435e-50ef-4524-a439-05ff87794952
-                      description: A description line
-                      itemType: descriptionOnlyItem
-                  deliveryAddress:
-                    line1: Delivery Street 15
-                    line2: Floor 2
-                    city: Stockholm
-                    postalCode: 111 11
-                    country: SE
-                  taxReduction:
-                    type: rot
-                    description: Bathroom renovation
-                    propertyType: realEstate
-                    realEstateNumber: STOCKHOLM SÖDER 1:2
-                    deductionPeople:
-                      - personalNumber: 19850101-1234
-                        deductionAmount: 1500
-                  metadata:
-                    project: Website Redesign
-                    department: IT
-                    externalId: EXT-INV-2024-001
+                $ref: "#/components/examples/invoiceUpdateRequest"
       responses:
         "200":
-          description: Invoice updated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/invoice"
-              examples:
-                Update invoice:
-                  value:
-                    id: a419cf69-db6f-4de9-992c-b1a60942a443
-                    type: invoice
-                    customerRef:
-                      id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-                      name: customer 1
-                      customerNumber: CUST-001
-                    contactDetailRef:
-                      id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-                      email: contact@customer1.com
-                      phone: "+46701234567"
-                    status: draft
-                    invoiceNumber: "1234"
-                    paymentReference: null
-                    orderNumberReference: ORD-5678
-                    projectReference: PROJ-001
-                    buyerReference: BUYER-123
-                    contractReference: CONTRACT-456
-                    currency: SEK
-                    currencyRate: 1
-                    totalAmount: 10000
-                    totalTax: 2500
-                    paidAmount: 0
-                    invoiceDate: 2024-10-10
-                    dueDate: 2024-10-10
-                    lineItems:
-                      - id: 1
-                        description: Product 1
-                        itemType: salesItem
-                        productType: goods
-                        unitType: piece
-                        quantity: 1
-                        unitPrice: 5000
-                        taxRate: 25
-                      - id: 2
-                        description: Installation work
-                        itemType: salesItem
-                        productType: services
-                        unitType: hour
-                        quantity: 10
-                        unitPrice: 500
-                        taxRate: 25
-                        projectRef:
-                          id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-                          projectName: Website Redesign
-                          projectNumber: P-001
-                        costCenterRef:
-                          tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-                          tagName: Nord
-                        taxReduction:
-                          taxReductionType: rot
-                          jobType: rotConstruction
-                      - id: 3
-                        itemRef:
-                          id: e964435e-50ef-4524-a439-05ff87794952
-                          description: A description line
-                        description: A description line
-                        itemType: descriptionOnlyItem
-                    billingAddress:
-                      line1: Älvsborgsvägen 10
-                      line2: null
-                      city: Göteborg
-                      postalCode: 123 45
-                      country: SE
-                    deliveryAddress:
-                      line1: Delivery Street 15
-                      line2: Floor 2
-                      city: Stockholm
-                      postalCode: 111 11
-                      country: SE
-                    taxReduction:
-                      type: rot
-                      description: Bathroom renovation
-                      propertyType: realEstate
-                      realEstateNumber: STOCKHOLM SÖDER 1:2
-                      deductionAmount: 1500
-                      status: draft
-                      deductionPeople:
-                        - personalNumber: 19850101-1234
-                          deductionAmount: 1500
-                    attachmentRefs:
-                      - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-                        fileName: myfile.pdf
-                      - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-                        fileName: myfile2.pdf
-                    metadata:
-                      project: Website Redesign
-                      department: IT
-                      externalId: EXT-INV-2024-001
+          $ref: "#/components/responses/invoiceResponse"
         "400":
           description: Missing required information
           content:
@@ -2594,8 +2195,8 @@ paths:
                       phone: "+46701234567"
                     currency: SEK
                     currencyRate: 1
-                    totalAmount: 200
-                    totalTax: 50
+                    totalAmount: 100
+                    totalTax: 25
                     paidAmount: 0
                     creditDate: 2024-10-15
                     dueDate: 2024-11-15
@@ -2611,6 +2212,9 @@ paths:
                         quantity: 2
                         unitPrice: 100
                         taxRate: 25
+                        discount:
+                          type: amount
+                          value: 100
                     billingAddress:
                       line1: Älvsborgsvägen 10
                       line2: null
@@ -2760,9 +2364,12 @@ paths:
                   itemType: salesItem
                   productType: goods
                   unitType: piece
-                  quantity: 1
+                  quantity: 2
                   unitPrice: 100
                   taxRate: 25
+                  discount:
+                    type: amount
+                    value: 100
               New line item with custom unit:
                 value:
                   description: Consulting session
@@ -2808,9 +2415,12 @@ paths:
                     itemType: salesItem
                     productType: goods
                     unitType: piece
-                    quantity: 1
+                    quantity: 2
                     unitPrice: 100
                     taxRate: 25
+                    discount:
+                      type: amount
+                      value: 100
                     projectRef:
                       id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
                       projectName: Website Redesign
@@ -7521,6 +7131,31 @@ components:
           readOnly: true
           description: Customer number of the referenced customer
           example: CUST-001
+    discount:
+      type: object
+      nullable: true
+      title: discount
+      description: |
+        A per-line discount. Either a percentage of the line total or a fixed amount in the invoice currency.
+      required:
+        - type
+        - value
+      properties:
+        type:
+          type: string
+          enum:
+            - percentage
+            - amount
+          description: |
+            `percentage` applies `value` as a percentage of the line total; `amount` subtracts `value` as a fixed amount in the invoice currency.
+        value:
+          type: number
+          format: double
+          description: |
+            For `percentage`, a value that must be greater than 0 and must not exceed 100. For `amount`, a value that must be greater than 0 in the invoice currency.
+      example:
+        type: percentage
+        value: 10
     lineItemTaxReduction:
       type: object
       nullable: true
@@ -7700,6 +7335,12 @@ components:
           nullable: true
           format: int32
           description: Use the `bookkeepingAccountNumber` field in the line items to specify an accounting account other than the account that would be automatically be selected based on the item productType, taxRate, customer and company settings. Accounts that would be automatically selected cannot be set on this field.
+        discount:
+          type: object
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/discount"
+          description: Line item discount. Currently supported on standard Bokio invoices.
         taxReduction:
           type: object
           nullable: true
@@ -7724,6 +7365,9 @@ components:
         unitPrice: 500
         taxRate: 25
         bookkeepingAccountNumber: 3389
+        discount:
+          type: percentage
+          value: 10
         projectRef:
           id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
           projectName: Website Redesign
@@ -7731,9 +7375,6 @@ components:
         costCenterRef:
           tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
           tagName: Nord
-        taxReduction:
-          taxReductionType: rot
-          jobType: rotConstruction
     descriptionOnlyInvoiceItem:
       type: object
       title: descriptionOnlyItem
@@ -8002,6 +7643,7 @@ components:
           type: number
           format: double
           readOnly: true
+          description: Total amount of the credit note including VAT.
         totalTax:
           type: number
           format: double
@@ -8031,6 +7673,7 @@ components:
           readOnly: true
         lineItems:
           type: array
+          description: "Line items for the credit note. The `discount` field on a line item is read-only for credit notes: the discount is taken from the original invoice, and sending a discount on write returns a validation error."
           items:
             oneOf:
               - $ref: "#/components/schemas/invoiceItem"
@@ -8100,8 +7743,8 @@ components:
           phone: "+46701234567"
         currency: SEK
         currencyRate: 1
-        totalAmount: 5200
-        totalTax: 1300
+        totalAmount: 6375
+        totalTax: 1275
         paidAmount: 0
         creditDate: 2024-10-15
         dueDate: 2024-11-15
@@ -8120,6 +7763,9 @@ components:
             quantity: 2
             unitPrice: 100
             taxRate: 25
+            discount:
+              type: amount
+              value: 100
           - id: 2
             description: Installation work
             itemType: salesItem
@@ -8128,9 +7774,6 @@ components:
             quantity: 10
             unitPrice: 500
             taxRate: 25
-            taxReduction:
-              taxReductionType: rot
-              jobType: rotConstruction
         billingAddress:
           line1: Älvsborgsvägen 10
           line2: null
@@ -8143,21 +7786,11 @@ components:
           city: Stockholm
           postalCode: 111 11
           country: SE
-        taxReduction:
-          type: rot
-          description: Bathroom renovation
-          propertyType: realEstate
-          realEstateNumber: STOCKHOLM SÖDER 1:2
-          deductionAmount: 1500
-          status: draft
-          deductionPeople:
-            - personalNumber: 19850101-1234
-              deductionAmount: 1500
         attachmentRefs:
           - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-            name: myfile.pdf
+            fileName: myfile.pdf
           - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-            name: myfile2.pdf
+            fileName: myfile2.pdf
         journalEntryRef:
           id: 340a4af0-edfd-47b1-b4ab-f30450eaac19
         metadata:
@@ -8368,6 +8001,7 @@ components:
           type: number
           format: double
           readOnly: true
+          description: Total amount of the invoice including VAT.
         totalTax:
           type: number
           format: double
@@ -8463,100 +8097,6 @@ components:
             project: Website Redesign
             department: IT
             externalId: EXT-INV-2024-001
-      example:
-        id: a419cf69-db6f-4de9-992c-b1a60942a443
-        type: invoice
-        customerRef:
-          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-          name: customer 1
-          customerNumber: CUST-001
-        contactDetailRef:
-          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
-          email: contact@customer1.com
-          phone: "+46701234567"
-        invoiceNumber: "1234"
-        paymentReference: null
-        orderNumberReference: ORD-5678
-        projectReference: PROJ-001
-        buyerReference: BUYER-123
-        contractReference: CONTRACT-456
-        currency: SEK
-        currencyRate: 1
-        totalAmount: 10000
-        totalTax: 2500
-        paidAmount: 0
-        status: draft
-        invoiceDate: 2024-10-10
-        dueDate: 2024-10-10
-        lineItems:
-          - id: 1
-            itemRef:
-              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
-              description: Product 1
-            description: Product 1
-            itemType: salesItem
-            productType: goods
-            unitType: piece
-            quantity: 1
-            unitPrice: 5000
-            taxRate: 25
-          - id: 2
-            description: Installation work
-            itemType: salesItem
-            productType: services
-            unitType: hour
-            quantity: 10
-            unitPrice: 500
-            taxRate: 25
-            projectRef:
-              id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
-              projectName: Website Redesign
-              projectNumber: P-001
-            costCenterRef:
-              tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
-              tagName: Nord
-            taxReduction:
-              taxReductionType: rot
-              jobType: rotConstruction
-          - id: 3
-            itemRef:
-              id: e964435e-50ef-4524-a439-05ff87794952
-              description: A description line
-            description: A description line
-            itemType: descriptionOnlyItem
-        billingAddress:
-          line1: Älvsborgsvägen 10
-          line2: null
-          city: Göteborg
-          postalCode: 123 45
-          country: SE
-        deliveryAddress:
-          line1: Delivery Street 15
-          line2: Floor 2
-          city: Stockholm
-          postalCode: 111 11
-          country: SE
-        taxReduction:
-          type: rot
-          description: Bathroom renovation
-          propertyType: realEstate
-          realEstateNumber: STOCKHOLM SÖDER 1:2
-          deductionAmount: 1500
-          status: draft
-          deductionPeople:
-            - personalNumber: 19850101-1234
-              deductionAmount: 1500
-        attachmentRefs:
-          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
-            fileName: myfile.pdf
-          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
-            fileName: myfile2.pdf
-        journalEntryRef:
-          id: f329df79-eb7f-5ef0-a8dc-c2b71f953554
-        metadata:
-          project: Website Redesign
-          department: IT
-          externalId: EXT-INV-2024-001
     invoiceAttachment:
       type: object
       title: invoiceAttachment
@@ -9766,6 +9306,479 @@ components:
         description: example.png
         contentType: img/png
         journalEntryId: 835ba700-b306-4bd9-8447-59207b6b0002
+  examples:
+    creditNoteResponseWithDiscount:
+      summary: Credit note with discount
+      value:
+        id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
+        status: published
+        invoiceNumber: CN-2024-001
+        invoiceRef:
+          id: a419cf69-db6f-4de9-992c-b1a60942a443
+          invoiceNumber: IN-2024-001
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+          customerNumber: CUST-001
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 6375
+        totalTax: 1275
+        paidAmount: 0
+        creditDate: 2024-10-15
+        dueDate: 2024-11-15
+        publishedDateTime: 2024-10-15T12:00:00
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+              description: Product 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            quantity: 2
+            unitPrice: 100
+            taxRate: 25
+            discount:
+              type: amount
+              value: 100
+          - id: 2
+            description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        attachmentRefs:
+          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+            fileName: myfile.pdf
+          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+            fileName: myfile2.pdf
+        journalEntryRef:
+          id: 340a4af0-edfd-47b1-b4ab-f30450eaac19
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+    creditNoteResponseWithTaxReduction:
+      summary: Credit note with tax reduction
+      value:
+        id: b529df79-eb7f-5ef0-a8dc-c2b71f953554
+        status: published
+        invoiceNumber: CN-2024-001
+        invoiceRef:
+          id: a419cf69-db6f-4de9-992c-b1a60942a443
+          invoiceNumber: IN-2024-001
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+          customerNumber: CUST-001
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 5200
+        totalTax: 1300
+        paidAmount: 0
+        creditDate: 2024-10-15
+        dueDate: 2024-11-15
+        publishedDateTime: 2024-10-15T12:00:00
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+              description: Product 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            quantity: 2
+            unitPrice: 100
+            taxRate: 25
+          - id: 2
+            description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+            taxReduction:
+              taxReductionType: rot
+              jobType: rotConstruction
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        taxReduction:
+          type: rot
+          description: Bathroom renovation
+          propertyType: realEstate
+          realEstateNumber: STOCKHOLM SÖDER 1:2
+          deductionAmount: 1500
+          status: draft
+          deductionPeople:
+            - personalNumber: 19850101-1234
+              deductionAmount: 1500
+        attachmentRefs:
+          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+            fileName: myfile.pdf
+          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+            fileName: myfile2.pdf
+        journalEntryRef:
+          id: 340a4af0-edfd-47b1-b4ab-f30450eaac19
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+    invoiceRequest:
+      summary: Invoice request body
+      value:
+        type: invoice
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+        orderNumberReference: ORD-5678
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        currency: SEK
+        currencyRate: 1
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - description: Product 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 5000
+            taxRate: 25
+          - description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+            projectRef:
+              id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
+            costCenterRef:
+              tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
+            taxReduction:
+              taxReductionType: rot
+              jobType: rotConstruction
+          - description: A description line
+            itemType: descriptionOnlyItem
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        taxReduction:
+          type: rot
+          description: Bathroom renovation
+          propertyType: realEstate
+          realEstateNumber: STOCKHOLM SÖDER 1:2
+          deductionPeople:
+            - personalNumber: 19850101-1234
+              deductionAmount: 1500
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+    invoiceResponseWithDiscount:
+      summary: Invoice with discount
+      value:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        type: invoice
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+          customerNumber: CUST-001
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
+        invoiceNumber: "1234"
+        paymentReference: null
+        orderNumberReference: ORD-5678
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 11250
+        totalTax: 2250
+        paidAmount: 0
+        status: draft
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 5000
+            taxRate: 25
+            discount:
+              type: amount
+              value: 1000
+          - id: 2
+            description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+            projectRef:
+              id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
+              projectName: Website Redesign
+              projectNumber: P-001
+            costCenterRef:
+              tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
+              tagName: Nord
+          - id: 3
+            description: A description line
+            itemType: descriptionOnlyItem
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        attachmentRefs:
+          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+            fileName: myfile.pdf
+          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+            fileName: myfile2.pdf
+        journalEntryRef:
+          id: e7f8a972-5a21-411b-aed2-f224d1b6fd68
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+    invoiceResponse:
+      summary: Invoice response body
+      value:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        type: invoice
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+          customerNumber: CUST-001
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+          email: contact@customer1.com
+          phone: "+46701234567"
+        invoiceNumber: "1234"
+        paymentReference: null
+        orderNumberReference: ORD-5678
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        currency: SEK
+        currencyRate: 1
+        totalAmount: 10000
+        totalTax: 2500
+        paidAmount: 0
+        status: draft
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - id: 1
+            itemRef:
+              id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+              description: Product 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 5000
+            taxRate: 25
+          - id: 2
+            description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+            projectRef:
+              id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
+              projectName: Website Redesign
+              projectNumber: P-001
+            costCenterRef:
+              tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
+              tagName: Nord
+            taxReduction:
+              taxReductionType: rot
+              jobType: rotConstruction
+          - id: 3
+            itemRef:
+              id: e964435e-50ef-4524-a439-05ff87794952
+              description: A description line
+            description: A description line
+            itemType: descriptionOnlyItem
+        billingAddress:
+          line1: Älvsborgsvägen 10
+          line2: null
+          city: Göteborg
+          postalCode: 123 45
+          country: SE
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        taxReduction:
+          type: rot
+          description: Bathroom renovation
+          propertyType: realEstate
+          realEstateNumber: STOCKHOLM SÖDER 1:2
+          deductionAmount: 1500
+          status: draft
+          deductionPeople:
+            - personalNumber: 19850101-1234
+              deductionAmount: 1500
+        attachmentRefs:
+          - id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
+            fileName: myfile.pdf
+          - id: 94a8f806-8493-40f6-9d5b-0495c84f8ab9
+            fileName: myfile2.pdf
+        journalEntryRef:
+          id: f329df79-eb7f-5ef0-a8dc-c2b71f953554
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+    invoiceUpdateRequest:
+      summary: Invoice update request body
+      value:
+        id: a419cf69-db6f-4de9-992c-b1a60942a443
+        type: invoice
+        customerRef:
+          id: 55c899c5-82b2-47fa-9c51-e35fc9b26443
+          name: customer 1
+        contactDetailRef:
+          id: d3b07384-d9a0-4c9b-8b3a-6e1f2a5c8d4e
+        orderNumberReference: ORD-5678
+        projectReference: PROJ-001
+        buyerReference: BUYER-123
+        contractReference: CONTRACT-456
+        currency: SEK
+        currencyRate: 1
+        invoiceDate: 2024-10-10
+        dueDate: 2024-10-10
+        lineItems:
+          - id: 1
+            description: Product 1
+            itemType: salesItem
+            productType: goods
+            unitType: piece
+            quantity: 1
+            unitPrice: 5000
+            taxRate: 25
+          - id: 2
+            description: Installation work
+            itemType: salesItem
+            productType: services
+            unitType: hour
+            quantity: 10
+            unitPrice: 500
+            taxRate: 25
+            projectRef:
+              id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
+            costCenterRef:
+              tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
+            taxReduction:
+              taxReductionType: rot
+              jobType: rotConstruction
+          - id: 3
+            itemRef:
+              id: e964435e-50ef-4524-a439-05ff87794952
+            description: A description line
+            itemType: descriptionOnlyItem
+        deliveryAddress:
+          line1: Delivery Street 15
+          line2: Floor 2
+          city: Stockholm
+          postalCode: 111 11
+          country: SE
+        taxReduction:
+          type: rot
+          description: Bathroom renovation
+          propertyType: realEstate
+          realEstateNumber: STOCKHOLM SÖDER 1:2
+          deductionPeople:
+            - personalNumber: 19850101-1234
+              deductionAmount: 1500
+        metadata:
+          project: Website Redesign
+          department: IT
+          externalId: EXT-INV-2024-001
+  responses:
+    invoiceResponse:
+      description: The invoice.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/invoice"
+          examples:
+            Invoice with discount:
+              $ref: "#/components/examples/invoiceResponseWithDiscount"
+            Invoice response:
+              $ref: "#/components/examples/invoiceResponse"
 x-readme:
   explorer-enabled: true
   proxy-enabled: false
