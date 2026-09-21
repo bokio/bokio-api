@@ -7673,7 +7673,7 @@ components:
           readOnly: true
         lineItems:
           type: array
-          description: "Line items for the credit note. The `discount` field on a line item is read-only for credit notes: the discount is taken from the original invoice, and sending a discount on write returns a validation error."
+          description: "Line items for the credit note. The `discount` field on a line item is read-only for credit notes that are connected to an original invoice: the discount is taken from the original invoice."
           items:
             oneOf:
               - $ref: "#/components/schemas/invoiceItem"

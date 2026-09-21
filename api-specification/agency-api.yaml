@@ -1060,7 +1060,7 @@ paths:
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
-  /agencies/{agencyId}/companies/{companyId}/users/{userId}/todos:
+  /agencies/{agencyId}/users/{userId}/todos:
     parameters:
       - name: agencyId
         in: path
@@ -1070,14 +1070,6 @@ paths:
           type: string
           format: uuid
           example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
-      - name: companyId
-        in: path
-        required: true
-        description: The unique identifier for the company
-        schema:
-          type: string
-          format: uuid
-          example: 17c72e33-77d4-467d-8fe3-f9bd35b303f3
       - name: userId
         in: path
         required: true
@@ -1089,14 +1081,14 @@ paths:
     get:
       tags:
         - agency-todos
-      summary: Retrieve todos for a user in an agency client company
+      summary: Retrieve todos for an agency user
       description: |
-        Retrieve the current-state worklist for the specified user in the specified client company that belongs to the specified agency.
+        Retrieve the current-state worklist for the specified agency user across up to five active client companies assigned to that user. Eligible companies are selected deterministically by company name and company ID. Results are globally ordered and limited to 100 items.
 
         **Localization:** Todo titles are localized based on the `Accept-Language` request header (`sv` or `en`). When the header is missing or the language is not supported, Swedish is used. The resolved language is returned in the `Content-Language` response header.
 
         **Scope:** `agency-todos:read`
-      operationId: get-agency-company-user-todos
+      operationId: get-agency-user-todos
       parameters:
         - name: Accept-Language
           in: header
@@ -1126,18 +1118,22 @@ paths:
               examples:
                 Todos:
                   value:
-                    - resourceType: supplierInvoice
+                    - companyId: 17c72e33-77d4-467d-8fe3-f9bd35b303f3
+                      companyName: Example Company AB
+                      resourceType: supplierInvoice
                       actionType: toPay
                       title: Match supplier payment
                       totalAmount: 1500
                       date: 2026-06-20
-                    - resourceType: receipt
+                    - companyId: 78c1b6d9-5c7c-4417-93d3-7db9b0a6e0e8
+                      companyName: Another Example AB
+                      resourceType: receipt
                       actionType: toRecord
                       title: Upload missing receipt
                       totalAmount: 450
                       date: 2026-06-21
         "404":
-          description: Agency, company, or user not found
+          description: Agency or user not found
           content:
             application/json:
               schema:
@@ -1560,7 +1556,17 @@ components:
     agencyTodoItemGet:
       title: agencyTodoItemGet
       type: object
+      required:
+        - companyId
+        - companyName
       properties:
+        companyId:
+          type: string
+          format: uuid
+          description: Unique identifier of the client company from which the todo originates
+        companyName:
+          type: string
+          description: Name of the client company from which the todo originates
         resourceType:
           type: string
           enum:
@@ -1595,6 +1601,8 @@ components:
           format: date
           description: Primary date associated with the todo item
       example:
+        companyId: 17c72e33-77d4-467d-8fe3-f9bd35b303f3
+        companyName: Example Company AB
         resourceType: supplierInvoice
         actionType: toPay
         title: Match supplier payment
