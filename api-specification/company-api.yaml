@@ -3593,6 +3593,8 @@ paths:
                     - debit: 0
                       credit: 160
                       account: 2611
+                  uploadRef:
+                    id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
               New journal with verification-level tags:
                 value:
                   title: invoice 1234
@@ -3734,7 +3736,7 @@ paths:
           in: query
           required: false
           description: |
-            [Preview] Filter journal entries by tag. Returns only journal entries that have the specified tag applied, either at the journal entry level or at the line item level.
+            Filter journal entries by tag. Returns only journal entries that have the specified tag applied, either at the journal entry level or at the line item level.
 
             Requires the Tags feature to be enabled in the company's price plan.
           schema:
@@ -3944,16 +3946,13 @@ paths:
     put:
       tags:
         - journal-entries
-      summary: "[Preview] Update journal entry tags"
+      summary: Update journal entry tags
       description: |
         Replaces all tags on a journal entry with the provided tags.
 
         Either set verification-level tags (using `tags`) or transaction-level tags (using `items[*].tags`), not both on the same journal entry.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `journal-entries:write`
       operationId: put-journalentry-tags
@@ -4106,6 +4105,122 @@ paths:
                 $ref: "#/components/schemas/apiError"
               examples:
                 Error:
+                  value:
+                    code: not-found
+                    message: journal entry not found
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /companies/{companyId}/journal-entries/{journalEntryId}/uploads:
+    parameters:
+      - name: companyId
+        in: path
+        required: true
+        description: Unique identifier of the company
+        schema:
+          type: string
+          format: uuid
+        example: ea9ee4dd-fae3-4aec-a7db-6fc9cc1f8135
+      - name: journalEntryId
+        in: path
+        required: true
+        description: Unique identifier of the journal entry
+        schema:
+          type: string
+          format: uuid
+        example: a419cf69-db6f-4de9-992c-b1a60942a443
+    post:
+      tags:
+        - journal-entries
+      summary: Add an upload to a journal entry
+      description: |
+        Add an upload to the journal entry.
+
+        **Scope:** `journal-entries:write`
+      operationId: post-journalentry-upload
+      requestBody:
+        description: Post the necessary fields for the API to add an upload to the journal entry.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/uploadRef"
+            examples:
+              Existing upload:
+                value:
+                  id: 24f3b7c1-8d6a-4e2f-9b31-5d7c2a8e4f90
+      responses:
+        "200":
+          description: Upload added to journal entry, returns the updated journal entry
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/journalEntry"
+              examples:
+                Journal entry with upload:
+                  value:
+                    id: a419cf69-db6f-4de9-992c-b1a60942a443
+                    title: invoice 1234
+                    journalEntryNumber: V342
+                    date: 2024-10-10
+                    items:
+                      - id: 1
+                        debit: 200
+                        credit: 0
+                        account: 1930
+                        tags: []
+                      - id: 2
+                        debit: 0
+                        credit: 40
+                        account: 3011
+                        tags: []
+                      - id: 3
+                        debit: 0
+                        credit: 160
+                        account: 2611
+                        tags: []
+                    tags: []
+                    uploadRef:
+                      id: 24f3b7c1-8d6a-4e2f-9b31-5d7c2a8e4f90
+        "400":
+          description: Validation or operation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Validation error:
+                  value:
+                    code: validation-error
+                    message: Missing required information
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/id"
+                        message: The upload id field is required
+                Upload already connected:
+                  value:
+                    code: validation-error
+                    message: Upload is already connected
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/id"
+                        message: Upload with id 24f3b7c1-8d6a-4e2f-9b31-5d7c2a8e4f90 is already connected
+                Journal entry already connected:
+                  value:
+                    code: validation-error
+                    message: Journal entry is already connected to an upload
+                    bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+                    errors:
+                      - field: "#/journalId"
+                        message: Journal entry with id a419cf69-db6f-4de9-992c-b1a60942a443 is already connected to an upload
+        "404":
+          description: Journal entry not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              examples:
+                Journal entry not found:
                   value:
                     code: not-found
                     message: journal entry not found
@@ -4473,7 +4588,7 @@ paths:
     post:
       tags:
         - supplier-invoices
-      summary: "[Preview] Create a supplier invoice"
+      summary: Create a supplier invoice
       description: |
         Creates a new supplier invoice for the company.
 
@@ -4587,7 +4702,7 @@ paths:
     get:
       tags:
         - supplier-invoices
-      summary: "[Preview] Get supplier invoices"
+      summary: Get supplier invoices
       description: |
         Get all supplier invoices for the company. Use the query parameters to filter and navigate through the results.
 
@@ -4753,7 +4868,7 @@ paths:
     get:
       tags:
         - supplier-invoices
-      summary: "[Preview] Get a supplier invoice"
+      summary: Get a supplier invoice
       description: |
         Retrieve the information of the supplier invoice with the matching supplierInvoiceId.
 
@@ -4815,7 +4930,7 @@ paths:
     put:
       tags:
         - supplier-invoices
-      summary: "[Preview] Update a supplier invoice"
+      summary: Update a supplier invoice
       description: |
         Update an existing supplier invoice for the company.
 
@@ -4921,7 +5036,7 @@ paths:
     delete:
       tags:
         - supplier-invoices
-      summary: "[Preview] Delete a supplier invoice"
+      summary: Delete a supplier invoice
       description: |
         Delete an existing supplier invoice for the company.
 
@@ -4965,7 +5080,7 @@ paths:
     post:
       tags:
         - supplier-invoices
-      summary: "[Preview] Add an upload to a supplier invoice"
+      summary: Add an upload to a supplier invoice
       description: |
         Add an upload to the supplier invoice.
 
@@ -5165,7 +5280,7 @@ paths:
     post:
       tags:
         - tag-groups
-      summary: "[Preview] Create a tag group"
+      summary: Create a tag group
       description: |
         Creates a new tag group for the company.
 
@@ -5173,9 +5288,6 @@ paths:
         such as "Project", "Cost center", or "Department".
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: post-tag-group
@@ -5250,15 +5362,12 @@ paths:
     get:
       tags:
         - tag-groups
-      summary: "[Preview] Get all tag groups"
+      summary: Get all tag groups
       description: |
         Retrieve all tag groups for the company, including their tags.
 
         The company must have the Tags feature enabled in their price plan.
 
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:read`
       operationId: get-tag-groups
@@ -5352,14 +5461,11 @@ paths:
     get:
       tags:
         - tag-groups
-      summary: "[Preview] Get a tag group by ID"
+      summary: Get a tag group by ID
       description: |
         Retrieve a specific tag group by its ID, including all its tags.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:read`
       operationId: get-tag-group-by-id
@@ -5422,7 +5528,7 @@ paths:
     put:
       tags:
         - tag-groups
-      summary: "[Preview] Update a tag group"
+      summary: Update a tag group
       description: |
         Update the details of an existing tag group.
 
@@ -5431,9 +5537,6 @@ paths:
         To manage tags within the group, use the tag sub-resource endpoints.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: put-tag-group
@@ -5521,16 +5624,13 @@ paths:
     delete:
       tags:
         - tag-groups
-      summary: "[Preview] Delete a tag group"
+      summary: Delete a tag group
       description: |
         Delete a tag group and all its tags.
 
         Deletion will fail if any tags in the group are currently in use on journal entries.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: delete-tag-group
@@ -5945,7 +6045,7 @@ paths:
     post:
       tags:
         - suppliers
-      summary: "[Preview] Create a supplier"
+      summary: Create a supplier
       description: |
         Creates a new supplier for the company.
 
@@ -6016,7 +6116,7 @@ paths:
     get:
       tags:
         - suppliers
-      summary: "[Preview] Get suppliers"
+      summary: Get suppliers
       description: |
         Get all suppliers for the company. Use the query parameters to filter and navigate through the results.
 
@@ -6091,7 +6191,7 @@ paths:
     get:
       tags:
         - suppliers
-      summary: "[Preview] Get a supplier"
+      summary: Get a supplier
       description: |
         Retrieve the information of the supplier with the matching supplierId.
 
@@ -6138,7 +6238,7 @@ paths:
     put:
       tags:
         - suppliers
-      summary: "[Preview] Update a supplier"
+      summary: Update a supplier
       description: |
         Update an existing supplier for the company.
 
@@ -6224,7 +6324,7 @@ paths:
     delete:
       tags:
         - suppliers
-      summary: "[Preview] Delete a supplier"
+      summary: Delete a supplier
       description: |
         Delete an existing supplier for the company.
 
@@ -6275,16 +6375,13 @@ paths:
     post:
       tags:
         - tag-groups
-      summary: "[Preview] Create a tag in a tag group"
+      summary: Create a tag in a tag group
       description: |
         Creates a new tag (value) within the specified tag group.
 
         Tag names must be unique within the tag group.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: post-tag-group-tag
@@ -6391,14 +6488,11 @@ paths:
     put:
       tags:
         - tag-groups
-      summary: "[Preview] Update a tag in a tag group"
+      summary: Update a tag in a tag group
       description: |
         Update the name of an existing tag within a tag group.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: put-tag-group-tag
@@ -6479,16 +6573,13 @@ paths:
     delete:
       tags:
         - tag-groups
-      summary: "[Preview] Delete a tag from a tag group"
+      summary: Delete a tag from a tag group
       description: |
         Delete a specific tag from a tag group.
 
         Deletion will fail if the tag is currently in use on any journal entries.
 
         The company must have the Tags feature enabled in their price plan.
-
-        **Preview:** This endpoint is in preview and may change or be removed before general availability.
-        [Read the full preview policy](/reference/versioning#preview)
 
         **Scope:** `tags:write`
       operationId: delete-tag-group-tag
@@ -7152,7 +7243,7 @@ components:
           type: number
           format: double
           description: |
-            For `percentage`, a value that must be greater than 0 and must not exceed 100. For `amount`, a value that must be greater than 0 in the invoice currency.
+            For `percentage`, a value that must be greater than 0 and must not exceed 100. For `amount`, a value in the invoice currency that must be greater than 0 and must not exceed the line total (`quantity` × `unitPrice`).
       example:
         type: percentage
         value: 10
@@ -7263,7 +7354,7 @@ components:
           title: itemRef
           nullable: true
           description: |
-            Identifier of an existing salesItem to use as a template. Fields itemType and quantity are required. Values in other fields will be overridden by values from this referenced item
+            Identifier of an existing salesItem to use as a template. `unitPrice` and `quantity` can be overridden on this line item; `description`, `productType`, `unitType`, `customUnitType`, `taxRate`, `bookkeepingAccountNumber` (and `unitPrice` when not set) come from the referenced item.
           properties:
             id:
               type: string
@@ -7340,13 +7431,13 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/discount"
-          description: Line item discount. Currently supported on standard Bokio invoices.
+          description: Line item discount applied to this line. Can be either a percentage of the line total or a fixed amount in the invoice currency. Omit or set to null when the line has no discount.
         taxReduction:
           type: object
           nullable: true
           allOf:
             - $ref: "#/components/schemas/lineItemTaxReduction"
-          description: tax reduction categorization for this line item. When the invoice has a taxReduction, each service line item should specify its job type. The type must match the invoice-level taxReduction type.
+          description: Tax reduction categorization for this line item. When the invoice has a taxReduction, each service line item should specify its job type. The type must match the invoice-level taxReduction type.
         projectRef:
           $ref: "#/components/schemas/projectRef"
         costCenterRef:
@@ -8546,6 +8637,16 @@ components:
           format: uuid
           readOnly: true
           nullable: true
+        uploadRef:
+          type: object
+          readOnly: true
+          nullable: true
+          properties:
+            id:
+              type: string
+              format: uuid
+              readOnly: true
+              description: Unique identifier of an existing upload
       required:
         - items
       example:
@@ -8570,6 +8671,8 @@ components:
             account: 2611
             tags: []
         tags: []
+        uploadRef:
+          id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
     journalEntryTags:
       type: object
       title: journalEntryTags
@@ -8613,6 +8716,16 @@ components:
           - tagId: b2c3d4e5-f6a7-8901-bcde-f12345678901
             weight: 1
         items: []
+    uploadRef:
+      type: object
+      title: UploadRef
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier of an existing upload
+      example:
+        id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
     journalEntryComment:
       type: object
       title: journalEntryComment
@@ -8702,16 +8815,6 @@ components:
         costCenterRef:
           tagId: 7e5ee25f-1f5d-4e47-a26f-5d2d20fbef90
           tagName: Nord
-    uploadRef:
-      type: object
-      title: UploadRef
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique identifier of an existing upload
-      example:
-        id: 240a4af0-edfd-47b1-b4ab-f30450eaac19
     supplierInvoiceGet:
       type: object
       title: SupplierInvoice
