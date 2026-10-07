@@ -1126,6 +1126,7 @@ paths:
                     postalCode: 123 45
                     country: SE
                   language: sv
+                  constructionReverseChargeEnabled: true
       responses:
         "200":
           description: Customer created
@@ -1155,6 +1156,7 @@ paths:
                       postalCode: 123 45
                       country: SE
                     language: sv
+                    constructionReverseChargeEnabled: true
                     modifiedDateTime: 2024-10-10T00:00:00Z
         "400":
           description: Missing required information
@@ -7950,6 +7952,13 @@ components:
           enum:
             - sv
             - en
+        constructionReverseChargeEnabled:
+          type: boolean
+          default: false
+          description: |
+            Whether invoices for this customer may use construction reverse charge.
+
+            This can only be enabled when the customer is a Swedish company. Defaults to false.
         modifiedDateTime:
           type: string
           format: date-time
@@ -7976,6 +7985,7 @@ components:
           postalCode: 123 45
           country: SE
         language: sv
+        constructionReverseChargeEnabled: true
         modifiedDateTime: 2024-10-10T00:00:00Z
     fiscalYear:
       title: Fiscal Year

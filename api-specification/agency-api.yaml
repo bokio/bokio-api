@@ -1023,6 +1023,10 @@ paths:
         Invite a user to one of the agency's client companies.
         Creates a pending invitation and sends an email.
 
+        The invitation is sent on behalf of a company user, who is named as the inviter in the email and on the page where the invitation is accepted.
+        By default this is the company owner. Use `inviterUserId` to send it on behalf of another company user. That user must have permission to manage users in the company, otherwise a `400` validation error is returned.
+        If the company has no owner, `inviterUserId` is required and a `400` validation error is returned when it is omitted.
+
         **Scope:** `agency-users:write`
       operationId: invite-agency-company-user
       requestBody:
@@ -1083,7 +1087,9 @@ paths:
         - agency-todos
       summary: Retrieve todos for an agency user
       description: |
-        Retrieve the current-state worklist for the specified agency user across up to five active client companies assigned to that user. Eligible companies are selected deterministically by company name and company ID. Results are globally ordered and limited to 100 items.
+        Retrieve the current-state worklist for the specified agency user across all active client companies assigned to that user. Results are globally ordered and limited to 100 items.
+
+        **Availability:** When the service is under heavy load the request can return `503` with error code `service-busy` and a `Retry-After` header. Retry after the number of seconds given in the header.
 
         **Localization:** Todo titles are localized based on the `Accept-Language` request header (`sv` or `en`). When the header is missing or the language is not supported, Swedish is used. The resolved language is returned in the `Content-Language` response header.
 
@@ -1142,6 +1148,23 @@ paths:
                 code: not-found
                 message: The requested resource with value 9b408943-7a1e-47ac-85a7-ac52b2c210d3 was not found
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "503":
+          description: The service is busy loading todos. Retry after the number of seconds in the `Retry-After` header.
+          headers:
+            Retry-After:
+              description: Number of seconds to wait before retrying the request.
+              schema:
+                type: integer
+                format: int32
+              example: 5
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: service-busy
+                message: The service is busy loading TODOs. Retry shortly.
+                bokioErrorId: 3f1c2b7e-8d4a-4c55-9a0e-2b6d1e4f7a90
       security:
         - tokenAuth: []
 components:
@@ -1553,6 +1576,11 @@ components:
           format: email
           description: Email address of the user to invite
           example: user@example.com
+        inviterUserId:
+          type: string
+          format: uuid
+          description: Unique identifier of the company user sending the invitation. The user must be a member of the company with permission to manage users. Defaults to the company owner when omitted, and is required when the company has no owner. The inviter is named in the invitation email and on the page where the invitation is accepted.
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
     agencyTodoItemGet:
       title: agencyTodoItemGet
       type: object
@@ -1577,6 +1605,12 @@ components:
             - payment
             - receipt
             - expense
+            - inbox
+            - draftVerification
+            - assetDepreciation
+            - dailyTakings
+            - salary
+            - vacation
           description: Type of resource represented by the todo item
         actionType:
           type: string
@@ -1587,6 +1621,8 @@ components:
             - toPay
             - toSchedulePay
             - getPaid
+            - toReview
+            - toComplete
           description: Action represented by the todo item
         title:
           type: string
