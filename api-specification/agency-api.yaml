@@ -943,6 +943,48 @@ paths:
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
+  /agencies/{agencyId}/invitations/{invitationId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: invitationId
+        in: path
+        required: true
+        description: The unique identifier for the invitation
+        schema:
+          type: string
+          format: uuid
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    delete:
+      tags:
+        - agency-users
+      summary: Remove a pending agency user invitation
+      description: |
+        Remove a pending invitation for an agency user.
+
+        **Scope:** `agency-users:write`
+      operationId: remove-agency-user-invitation
+      responses:
+        "204":
+          description: Invitation removed successfully
+        "400":
+          description: Cannot remove an invitation that has already been accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: operation-not-allowed
+                message: Cannot remove an invitation that has already been accepted
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
   /agencies/{agencyId}/companies/{companyId}/invitations:
     parameters:
       - name: agencyId
@@ -1051,6 +1093,66 @@ paths:
               example:
                 code: validation-error
                 message: A pending invitation already exists for this email address
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Company client is not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/invitations/{invitationId}:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the client company
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+      - name: invitationId
+        in: path
+        required: true
+        description: The unique identifier for the invitation
+        schema:
+          type: string
+          format: uuid
+          example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    delete:
+      tags:
+        - agency-users
+      summary: Remove a pending client company user invitation
+      description: |
+        Remove a pending invitation for a user of an agency client company.
+
+        **Scope:** `agency-users:write`
+      operationId: remove-agency-company-user-invitation
+      responses:
+        "204":
+          description: Invitation removed successfully
+        "400":
+          description: Cannot remove an invitation that has already been accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: operation-not-allowed
+                message: Cannot remove an invitation that has already been accepted
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
         "404":
           description: Company client is not found under this agency

@@ -7440,6 +7440,16 @@ components:
           allOf:
             - $ref: "#/components/schemas/lineItemTaxReduction"
           description: Tax reduction categorization for this line item. When the invoice has a taxReduction, each service line item should specify its job type. The type must match the invoice-level taxReduction type.
+        reverseChargeType:
+          type: string
+          nullable: true
+          enum:
+            - construction
+            - null
+          description: |
+            The reverse charge type applied to this line item. Omit or set to null when reverse charge does not apply.
+
+            - `construction`: Applies construction reverse charge. Only valid for service line items and cannot be combined with tax reduction.
         projectRef:
           $ref: "#/components/schemas/projectRef"
         costCenterRef:
@@ -7461,6 +7471,7 @@ components:
         discount:
           type: percentage
           value: 10
+        reverseChargeType: construction
         projectRef:
           id: 4f8f6da6-4cbc-4bfc-8d23-67d5f6f2dd9b
           projectName: Website Redesign
