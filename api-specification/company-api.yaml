@@ -8164,6 +8164,9 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/invoiceTaxReduction"
+        totalRoundingEnabled:
+          type: boolean
+          description: Whether the invoice total is rounded to a whole number. When omitted, the company default is applied (on both create and update).
         attachmentRefs:
           type: array
           readOnly: true
@@ -9604,6 +9607,7 @@ components:
         currencyRate: 1
         invoiceDate: 2024-10-10
         dueDate: 2024-10-10
+        totalRoundingEnabled: false
         lineItems:
           - description: Product 1
             itemRef:
@@ -9726,6 +9730,7 @@ components:
             fileName: myfile2.pdf
         journalEntryRef:
           id: e7f8a972-5a21-411b-aed2-f224d1b6fd68
+        totalRoundingEnabled: true
         metadata:
           project: Website Redesign
           department: IT
@@ -9822,6 +9827,7 @@ components:
             fileName: myfile2.pdf
         journalEntryRef:
           id: f329df79-eb7f-5ef0-a8dc-c2b71f953554
+        totalRoundingEnabled: true
         metadata:
           project: Website Redesign
           department: IT
@@ -9844,6 +9850,7 @@ components:
         currencyRate: 1
         invoiceDate: 2024-10-10
         dueDate: 2024-10-10
+        totalRoundingEnabled: false
         lineItems:
           - id: 1
             description: Product 1
