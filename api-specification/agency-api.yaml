@@ -265,7 +265,8 @@ paths:
       summary: Get a navigation URL for a client company
       description: |
         Generate a deep link URL to navigate directly into Bokio for the specified client company.
-        Optionally provide a `todoType` to navigate to a specific area (e.g. unrecorded receipts).
+        Optionally provide a `resourceType` from the todos endpoint to navigate to the matching area
+        (e.g. unrecorded receipts). The value matches the `resourceType` returned by the agency todos endpoint.
 
         **Scope:** `agency-companies:read`
       operationId: get-agency-company-navigation
@@ -278,14 +279,29 @@ paths:
             type: string
             format: uuid
           example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
-        - name: todoType
+        - name: resourceType
           in: query
           required: false
           description: |
-            Optional todo type to navigate to a specific area in Bokio for the company.
+            Optional resource type to navigate to the matching area in Bokio for the company.
+            Matches the `resourceType` returned by the agency todos endpoint.
           schema:
             type: string
-          example: receipt.unrecorded
+            enum:
+              - none
+              - vat
+              - supplierInvoice
+              - invoice
+              - payment
+              - receipt
+              - expense
+              - inbox
+              - draftVerification
+              - assetDepreciation
+              - dailyTakings
+              - salary
+              - vacation
+          example: receipt
       responses:
         "200":
           description: Navigation URL generated
@@ -294,7 +310,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/agencyCompanyNavigation"
               example:
-                url: https://app.bokio.se/company/55c899c5-82b2-47fa-9c51-e35fc9b26443
+                url: https://app.bokio.se/55c899c5-82b2-47fa-9c51-e35fc9b26443/uploads
         "400":
           description: User does not have access to the company
           content:
@@ -1106,6 +1122,75 @@ paths:
                 bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
       security:
         - tokenAuth: []
+  /agencies/{agencyId}/companies/{companyId}/add-or-invite-user:
+    parameters:
+      - name: agencyId
+        in: path
+        required: true
+        description: The unique identifier for the agency
+        schema:
+          type: string
+          format: uuid
+          example: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      - name: companyId
+        in: path
+        required: true
+        description: The unique identifier for the client company
+        schema:
+          type: string
+          format: uuid
+          example: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+    post:
+      tags:
+        - agency-users
+      summary: Add or invite a user to a client company
+      description: |
+        Add or invite a user to one of the agency's client companies.
+
+        If the email belongs to an existing Bokio user, the user is added directly to the company. Otherwise, a pending invitation is created and an email is sent.
+        The integrator is responsible for ensuring that only users who are valid and authorized in its system are added to the company or sent invitations.
+
+        The invitation is sent on behalf of a company user, who is named as the inviter in the email and on the page where the invitation is accepted.
+        By default this is the company owner. Use `inviterUserId` to send it on behalf of another company user. That user must have permission to manage users in the company, otherwise a `400` validation error is returned.
+        If the company has no owner, `inviterUserId` is required and a `400` validation error is returned when it is omitted.
+
+        **Scope:** `agency-users:write`
+      operationId: add-or-invite-agency-company-user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/companyUserInvitationWriteModel"
+      responses:
+        "200":
+          description: User added or invited
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/addOrInviteUserGetModel"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: validation-error
+                message: A pending invitation already exists for this email address
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+        "404":
+          description: Company client is not found under this agency
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/apiError"
+              example:
+                code: not-found
+                message: The requested resource with value a1b2c3d4-e5f6-7890-abcd-ef1234567890 was not found
+                bokioErrorId: 9b408943-7a1e-47ac-85a7-ac52b2c210d3
+      security:
+        - tokenAuth: []
   /agencies/{agencyId}/companies/{companyId}/invitations/{invitationId}:
     parameters:
       - name: agencyId
@@ -1502,7 +1587,7 @@ components:
           format: uri
           description: Deep link URL to navigate into Bokio for the company
       example:
-        url: https://app.bokio.se/company/55c899c5-82b2-47fa-9c51-e35fc9b26443
+        url: https://app.bokio.se/55c899c5-82b2-47fa-9c51-e35fc9b26443/uploads
     agencyInformation:
       title: agencyInformation
       type: object
@@ -1683,6 +1768,43 @@ components:
           format: uuid
           description: Unique identifier of the company user sending the invitation. The user must be a member of the company with permission to manage users. Defaults to the company owner when omitted, and is required when the company has no owner. The inviter is named in the invitation email and on the page where the invitation is accepted.
           example: b2c3d4e5-f6a7-8901-bcde-f12345678901
+    addOrInviteUserGetModel:
+      title: addOrInviteUserGetModel
+      type: object
+      required:
+        - operation
+        - id
+        - email
+        - status
+      properties:
+        operation:
+          type: string
+          enum:
+            - added
+            - invited
+          description: |
+            The operation performed for the requested email address:
+            - `added`: The email belongs to an existing Bokio user who was added to the company.
+            - `invited`: No Bokio user exists for the email, so a pending invitation was created.
+        id:
+          type: string
+          format: uuid
+          description: Unique identifier for the user or invitation, depending on the operation
+        email:
+          type: string
+          format: email
+          description: Email address of the user or invitation
+        status:
+          type: string
+          enum:
+            - active
+            - pendingInvitation
+          description: Status of the user or invitation
+      example:
+        operation: added
+        id: b2c3d4e5-f6a7-8901-bcde-f12345678901
+        email: staff@agency.com
+        status: active
     agencyTodoItemGet:
       title: agencyTodoItemGet
       type: object
